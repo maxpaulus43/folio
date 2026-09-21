@@ -1,6 +1,6 @@
 # Folio — resume studio
 
-[folio.maxpaul.us](folio.maxpaul.us)
+[folio.maxpaul.us](https://folio.maxpaul.us)
 
 A single-file resume builder: structured editing for contact, summary, experience,
 education, projects, skills, certifications and involvement; live letter-size preview
