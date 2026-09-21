@@ -41,7 +41,7 @@ a{color:var(--accent)}
 
 /* ---- shell ---- */
 .shell{height:100%;display:flex;flex-direction:column}
-.topbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
 .brand{display:flex;align-items:baseline;gap:8px;margin-right:auto}
 .brand .mark{font-family:"Spectral",Georgia,serif;font-weight:700;font-size:20px;letter-spacing:-.01em}
 .brand .tag{color:var(--muted);font-size:12.5px}
@@ -224,7 +224,8 @@ a{color:var(--accent)}
 .chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 .chip.present{background:transparent;color:var(--muted);cursor:default}
 .checks{list-style:none;margin:0;padding:0}
-.checks li{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.checks li{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+.checks li .btn{flex:none;margin-top:2px}
 .checks li:last-child{border:0}
 .checks .ic{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;flex:none;background:var(--warn-soft);color:var(--warn)}
 .checks li.ok .ic{background:var(--accent-soft);color:var(--ok)}
@@ -276,7 +277,6 @@ a{color:var(--accent)}
 <div class="shell">
   <div class="topbar">
     <div class="brand"><span class="mark">Folio</span><span class="tag">resume studio</span></div>
-    <a class="btn sm ai" href="ai/" style="text-decoration:none">open in claude for AI tools</a>
     <button class="score" id="scoreBtn" title="Resume health"><span class="ring" id="ring"></span><b id="scoreNum">–</b><span class="hide-m">/100</span></button>
     <button class="btn ai" id="aiMenuBtn"><span>✦</span><span class="hide-m">AI tools</span></button>
     <div class="menu" id="dlMenu">
@@ -327,6 +327,20 @@ a{color:var(--accent)}
   <footer id="mFoot"></footer>
 </div></div>
 <div class="toast" id="toast"></div>
+<script>
+/* PDF fonts live in ./fonts and are fetched on first export, then kept in memory. */
+const FONT_FILES = ['Spectral-Regular','Spectral-Bold','Spectral-Italic','Spectral-BoldItalic','Carlito-Regular','Carlito-Bold','Carlito-Italic','Carlito-BoldItalic'];
+let FONT_VFS = null;
+async function loadFonts(family) {
+  FONT_VFS = FONT_VFS || {};
+  const need = FONT_FILES.filter(f => f.startsWith(family) && !FONT_VFS[f + '.ttf']);
+  await Promise.all(need.map(async f => {
+    const r = await fetch(`fonts/${f}.ttf`); if (!r.ok) throw new Error(`fonts/${f}.ttf ${r.status}`);
+    const bytes = new Uint8Array(await r.arrayBuffer()); let s = ''; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    FONT_VFS[f + '.ttf'] = btoa(s);
+  }));
+}
+</script>
 <script>
 /* =========================== state =========================== */
 const uid = () => Math.random().toString(36).slice(2, 9);
@@ -665,40 +679,106 @@ function allBullets() {
   ['experience','projects','involvement','education'].forEach(sec => S[sec].forEach(e => (e.bullets||[]).forEach((b,i) => { if (b.trim()) out.push({ sec, e, i, text:b.trim() }); })));
   return out;
 }
+const BUZZ = /\b(results?[- ]driven|detail[- ]oriented|team player|hard[- ]work(er|ing)|proven track record|go[- ]getter|think(ing)? outside the box|synerg(y|ies)|self[- ]starter|dynamic|passionate|highly motivated|motivated|excellent communication skills|fast learner|quick learner|strategic thinker|thought leader|guru|ninja|rockstar|best of breed|value[- ]add|go[- ]to person|people person|multitask(er|ing)|seasoned professional|extensive experience)\b/i;
+const FILLER = /^(attended|participated in|used|utilized|helped out|assisted with|worked in a team|performed (various|general|daily)|handled|dealt with|various tasks|other duties|general (admin|office))/i;
+const SOFT = /^(communication|teamwork|team ?work|problem[- ]solving|leadership|hard[- ]working|time management|adaptability|work ethic|interpersonal|collaboration|critical thinking|creativity|organization|organized|multitasking|attention to detail|fast learner|dedicated|flexible|motivated|positive attitude)$/i;
+function yearOf(s) { const m = String(s||'').match(/(19|20)\d{2}/); return m ? +m[0] : null; }
+function dateStyle(s) { s = String(s||'').trim(); if (!s) return null; if (/^(19|20)\d{2}$/.test(s)) return 'year'; if (/^[A-Za-z]{3,9}\.? (19|20)\d{2}$/.test(s)) return 'month'; if (/^\d{1,2}\/(19|20)\d{2}$/.test(s)) return 'numeric'; return 'other'; }
 function healthChecks() {
-  const c = S.contact, bl = allBullets(), checks = [];
-  checks.push({ ok: !!(c.name && c.email && c.phone), t:'Contact details complete', s:'Name, email and phone are all present.' });
-  checks.push({ ok: !!(c.linkedin || c.website || c.github), t:'At least one link', s:'LinkedIn, portfolio or GitHub gives the reader somewhere to go next.' });
-  const wordsSum = S.summary.trim().split(/\s+/).filter(Boolean).length;
-  checks.push({ ok: S.settings.hidden.summary || (wordsSum >= 25 && wordsSum <= 70), t:'Summary is a tight 25–70 words', s: wordsSum ? `${wordsSum} words right now.` : 'No summary yet — or hide the section if you are early-career.' });
-  checks.push({ ok: S.experience.length > 0, t:'Experience listed', s:'At least one role with dates.' });
-  const bPerRole = S.experience.map(e => e.bullets.filter(b=>b.trim()).length);
-  checks.push({ ok: bPerRole.every(n => n >= 2 && n <= 6), t:'2–6 bullets per role', s: bPerRole.length ? `Current counts: ${bPerRole.join(', ')}.` : 'Add roles to check.' });
-  const weakB = bl.filter(b => WEAK.test(b.text) || !VERBS.test(b.text));
-  checks.push({ ok: bl.length > 0 && weakB.length === 0, t:'Every bullet opens with an action verb', s: weakB.length ? `${weakB.length} bullet${weakB.length>1?'s':''} start${weakB.length>1?'':'s'} weakly (e.g. "${weakB[0].text.slice(0,50)}…").` : 'Strong openers throughout.' });
-  const withNum = bl.filter(b => /\d/.test(b.text));
-  checks.push({ ok: bl.length > 0 && withNum.length / bl.length >= 0.5, t:'Half or more bullets are quantified', s: bl.length ? `${withNum.length} of ${bl.length} include a number.` : 'Add bullets to check.' });
-  const long = bl.filter(b => b.text.length > 230);
-  checks.push({ ok: long.length === 0, t:'Bullets fit on two lines', s: long.length ? `${long.length} bullet${long.length>1?'s are':' is'} longer than ~230 characters.` : 'All bullets are concise.' });
-  const pronoun = bl.filter(b => /\b(I|my|me|we|our)\b/.test(b.text));
-  checks.push({ ok: pronoun.length === 0 && !/\b(I|my|me)\b/.test(S.summary), t:'No first-person pronouns', s: pronoun.length ? `${pronoun.length} bullet${pronoun.length>1?'s use':' uses'} "I", "my" or "we".` : 'Written in resume voice.' });
-  checks.push({ ok: S.skills.length > 0 && S.skills.some(s => s.items.split(',').length >= 5), t:'Skills section with 5+ skills', s:'Recruiters and ATS filters scan this section first.' });
-  const dated = [...S.experience, ...S.education].every(e => e.start && (e.end || e.current));
-  checks.push({ ok: dated && (S.experience.length + S.education.length) > 0, t:'Every role and degree has dates', s:'Gaps or missing dates are a common ATS rejection reason.' });
+  const c = S.contact, bl = allBullets(), exp = vis('experience'), C = [];
+  const add = (cat, w, ok, t, s, go) => C.push({ cat, w, ok: !!ok, t, s, go });
+  const allText = [S.summary, ...bl.map(b=>b.text)].join('\n');
   const pages = Math.max(1, Math.ceil((parseInt($('#paper').style.minHeight) || 1056) / 1056));
-  checks.push({ ok: pages <= (S.experience.length > 4 ? 2 : 1), t: S.experience.length > 4 ? 'Fits on two pages' : 'Fits on one page', s:`Currently ${pages} page${pages>1?'s':''}.` });
-  return checks;
+  const expYears = (() => { const ys = exp.map(e=>yearOf(e.start)).filter(Boolean); return ys.length ? new Date().getFullYear() - Math.min(...ys) : 0; })();
+  const skillList = S.skills.flatMap(s => s.items.split(/[,;•|]/).map(x=>x.trim()).filter(Boolean));
+
+  /* ---- Contact & header ---- */
+  add('Contact', 3, c.name && c.email && c.phone && c.location, 'Contact details complete', 'Name, email, phone and city. Recruiters filter by location; a full street address is unnecessary.', 'contact');
+  add('Contact', 1, !c.email || !/\d{4,}|^(cool|hot|sexy|xx|lil|baby|gamer|420|69)/i.test(c.email.split('@')[0]), 'Professional email address', 'Ideally firstname.lastname; nicknames or long digit strings read as unprofessional.', 'contact');
+  add('Contact', 2, c.linkedin || c.website || c.github, 'At least one link', 'LinkedIn, portfolio or GitHub gives the reader somewhere to verify and learn more.', 'contact');
+  add('Contact', 1, !!c.title, 'Headline states the target role', 'A one-line headline under your name tells the reader what you are applying for and matches the posting\u2019s title wording.', 'contact');
+
+  /* ---- Summary ---- */
+  const sumWords = S.summary.trim().split(/\s+/).filter(Boolean).length;
+  const sumOff = S.settings.hidden.summary;
+  add('Summary', 2, sumOff || (sumWords >= 25 && sumWords <= 70), 'Summary is 25\u201370 words (or hidden)', sumWords ? `${sumWords} words now. Two to three sentences: role, years, strongest proof, what you bring.` : 'Empty. Write one, or hide the section if you have under two years of experience.', 'summary');
+  add('Summary', 2, sumOff || !sumWords || (!BUZZ.test(S.summary) && /\d/.test(S.summary)), 'Summary has proof, not adjectives', BUZZ.test(S.summary) ? `Contains a clich\u00e9 ("${(S.summary.match(BUZZ)||[''])[0]}"). Replace it with a concrete achievement.` : /\d/.test(S.summary) || !sumWords ? 'Includes at least one number or named result.' : 'No numbers yet \u2014 add years of experience or a headline metric.', 'summary');
+
+  /* ---- Experience: structure ---- */
+  add('Experience', 3, exp.length > 0, 'At least one experience entry', 'Include internships, freelance, part-time or volunteer roles if you are early-career; an empty resume reads as an empty candidate.', 'experience');
+  const perRole = exp.map(e => e.bullets.filter(b=>b.trim()).length);
+  add('Experience', 2, exp.length && perRole.every(n => n >= 2 && n <= 6), '2\u20136 bullets per role', perRole.length ? `Counts: ${perRole.join(', ')}. Recent roles deserve 4\u20136, older ones 2\u20133.` : 'Add roles to check.', 'experience');
+  add('Experience', 1, !exp.length || perRole[0] >= 3, 'Most recent role has 3+ bullets', 'The top role gets the most attention; give it the most evidence.', 'experience');
+  const years = exp.map(e => yearOf(e.current ? '' : e.end) || (e.current ? 9999 : yearOf(e.start)));
+  const desc = years.every((y,i) => i === 0 || y === null || years[i-1] === null || years[i-1] >= y);
+  add('Experience', 2, desc, 'Reverse-chronological order', desc ? 'Most recent role first \u2014 the format recruiters and parsers expect.' : 'Some roles appear out of order. Use the \u2191\u2193 arrows so the newest is on top.', 'experience');
+  const dated = [...exp, ...vis('education')].every(e => e.start && (e.end || e.current));
+  add('Experience', 2, dated && (exp.length + S.education.length) > 0, 'Every role and degree has dates', 'Missing dates look like hidden gaps and break parsing.', 'experience');
+  const styles = new Set([...exp, ...vis('education'), ...vis('involvement')].flatMap(e => [dateStyle(e.start), dateStyle(e.current ? '' : e.end)]).filter(Boolean));
+  add('Experience', 1, styles.size <= 1 && !styles.has('other'), 'Consistent date format', styles.size > 1 ? 'Mixed formats (e.g. "2022" and "Jun 2022"). Pick one \u2014 "Mon YYYY" is the safest for parsers.' : styles.has('other') ? 'Use "Mon YYYY" or "YYYY"; free-form dates confuse parsers.' : 'One format throughout.', 'experience');
+
+  /* ---- Bullets: impact ---- */
+  const weakB = bl.filter(b => WEAK.test(b.text) || !VERBS.test(b.text));
+  add('Impact', 3, bl.length > 0 && weakB.length === 0, 'Every bullet opens with an action verb', weakB.length ? `${weakB.length} start${weakB.length>1?'':'s'} weakly \u2014 e.g. "${weakB[0].text.slice(0,55)}\u2026". "Responsible for" is the most over-used phrase on resumes.` : bl.length ? 'Strong openers throughout.' : 'Add bullets to check.', weakB[0]?.sec);
+  const withNum = bl.filter(b => /\d/.test(b.text));
+  add('Impact', 3, bl.length > 0 && withNum.length / bl.length >= 0.5, 'Half or more bullets are quantified', bl.length ? `${withNum.length} of ${bl.length} include a number. Revenue, time saved, users, % change, team size \u2014 anything measurable.` : 'Add bullets to check.', 'experience');
+  const noOutcome = bl.filter(b => !/\d/.test(b.text) && !/(result|led to|enabl|improv|reduc|increas|cut|saved|grew|deliver|launch|achiev|won|boost|accelerat|drove|so that|which)/i.test(b.text));
+  add('Impact', 2, bl.length > 0 && noOutcome.length <= Math.floor(bl.length * 0.25), 'Bullets show outcomes, not just tasks', noOutcome.length ? `${noOutcome.length} read as duties with no visible result \u2014 e.g. "${noOutcome[0].text.slice(0,55)}\u2026". Add what changed because of the work.` : 'Each bullet connects action to a result.', noOutcome[0]?.sec);
+  const buzzB = bl.filter(b => BUZZ.test(b.text));
+  add('Impact', 2, buzzB.length === 0, 'No clich\u00e9s or buzzwords', buzzB.length ? `${buzzB.length} bullet${buzzB.length>1?'s':''} lean on phrases like "${(buzzB[0].text.match(BUZZ)||[''])[0]}". Show it with an example instead of claiming it.` : 'No "results-driven team player" filler.', buzzB[0]?.sec);
+  const fill = bl.filter(b => FILLER.test(b.text) || b.text.length < 40);
+  add('Impact', 1, fill.length === 0, 'No filler bullets', fill.length ? `${fill.length} bullet${fill.length>1?'s are':' is'} too short or generic to prove anything (e.g. "${fill[0].text.slice(0,50)}"). Cut or expand.` : 'Every bullet earns its line.', fill[0]?.sec);
+  const long = bl.filter(b => b.text.length > 230);
+  add('Impact', 1, long.length === 0, 'Bullets fit on two lines', long.length ? `${long.length} run past ~230 characters. Split or trim \u2014 walls of text get skimmed.` : 'All bullets are concise.', long[0]?.sec);
+  const firstWords = bl.map(b => b.text.split(/\s+/)[0].toLowerCase().replace(/[^a-z]/g,''));
+  const counts = {}; firstWords.forEach(w => counts[w] = (counts[w]||0) + 1);
+  const overused = Object.entries(counts).filter(([w,n]) => n >= 3 && w).sort((a,b)=>b[1]-a[1]);
+  add('Impact', 1, overused.length === 0, 'Varied opening verbs', overused.length ? `"${overused[0][0]}" opens ${overused[0][1]} bullets. Repetition reads as robotic \u2014 vary the verb.` : 'No verb used three or more times.', 'experience');
+  const pron = bl.filter(b => /\b(I|my|me|we|our|us)\b/.test(b.text));
+  add('Impact', 2, pron.length === 0 && !/\b(I|my|me)\b/.test(S.summary), 'No first-person pronouns', pron.length ? `${pron.length} bullet${pron.length>1?'s use':' uses'} "I", "we" or "my". Resume voice drops the subject.` : 'Written in resume voice.', pron[0]?.sec);
+  const seen = new Set(), dup = bl.filter(b => { const k = b.text.toLowerCase().replace(/\W+/g,' ').trim(); if (seen.has(k)) return true; seen.add(k); return false; });
+  add('Impact', 1, dup.length === 0, 'No duplicated bullets', dup.length ? `${dup.length} bullet${dup.length>1?'s appear':' appears'} more than once.` : 'Each bullet says something new.', dup[0]?.sec);
+
+  /* ---- Skills ---- */
+  const hard = skillList.filter(s => !SOFT.test(s));
+  add('Skills', 2, hard.length >= 8 && hard.length <= 20, '8\u201320 hard skills listed', `${hard.length} now. Tools, languages, platforms, methods \u2014 the terms a recruiter searches for.`, 'skills');
+  const softs = skillList.filter(s => SOFT.test(s));
+  add('Skills', 1, softs.length === 0, 'Skills section is hard skills only', softs.length ? `"${softs.slice(0,3).join('", "')}" ${softs.length>1?'are':'is'} soft. Demonstrate these in bullets; they are noise in a skills list.` : 'Soft skills are shown, not listed.', 'skills');
+  add('Skills', 1, skillList.length <= 8 || S.skills.filter(s=>s.category.trim()).length >= 2, 'Skills grouped into categories', skillList.length > 8 ? 'A long list scans faster split into Languages / Frameworks / Tools etc.' : 'Short list \u2014 categories optional.', 'skills');
+  const bodyLower = allText.toLowerCase();
+  const reinforced = hard.filter(s => bodyLower.includes(s.toLowerCase()));
+  add('Skills', 2, hard.length === 0 || reinforced.length / hard.length >= 0.4, 'Skills backed up in bullets', hard.length ? `${reinforced.length} of ${hard.length} skills also appear in your experience or projects. Recruiters trust a skill they can see in use; a bare list looks like keyword stuffing.` : 'Add skills to check.', 'skills');
+
+  /* ---- Format & length ---- */
+  const targetPages = expYears >= 10 ? 2 : 1;
+  add('Format', 3, pages <= targetPages, targetPages === 1 ? 'Fits on one page' : 'Fits on two pages', `Currently ${pages} page${pages>1?'s':''}. ${expYears < 10 ? 'Under ten years of experience: one page. Trim older roles to 2 bullets or hide side projects.' : 'Ten-plus years earns a second page, but only for relevant detail.'}`, undefined);
+  add('Format', 1, bl.length >= 6 || (exp.length + vis('projects').length + vis('involvement').length) >= 3, 'Enough substance on the page', bl.length < 6 ? 'Fewer than six bullets overall. Add projects, coursework, volunteering or freelance work \u2014 they count.' : 'The page is not a blank canvas.', 'projects');
+  const odd = bl.filter(b => /[\u{1F300}-\u{1FAFF}\u2600-\u27BF\u2190-\u21FF\u25A0-\u25FF]/u.test(b.text));
+  add('Format', 1, odd.length === 0, 'No emoji or decorative symbols', odd.length ? `${odd.length} bullet${odd.length>1?'s contain':' contains'} symbols that parsers mangle. Plain text only.` : 'Plain text throughout \u2014 parses cleanly. (Folio\u2019s single-column layout, standard headings and text-based PDF are already ATS-safe.)', odd[0]?.sec);
+  const ends = bl.map(b => /[.!]$/.test(b.text)); const mixedEnds = ends.some(Boolean) && !ends.every(Boolean);
+  const dbl = bl.filter(b => /\s{2,}|\s[,.]/.test(b.text) || /^[a-z]/.test(b.text));
+  add('Format', 1, !mixedEnds && dbl.length === 0, 'Consistent punctuation and spacing', mixedEnds ? 'Some bullets end with a period and others do not \u2014 pick one. (Folio recommends none.)' : dbl.length ? `${dbl.length} bullet${dbl.length>1?'s have':' has'} a double space, space before punctuation, or lowercase start.` : 'Tidy. Still proofread names, dates and headings by eye before sending.', dbl[0]?.sec);
+  // nothing to judge yet: don't let empty sections pass vacuously
+  if (!bl.length) C.forEach(c => { if (c.cat === 'Impact') { c.ok = false; c.s = 'Add bullets to check.'; } });
+  if (!skillList.length) C.forEach(c => { if (c.cat === 'Skills') { c.ok = false; c.s = 'Add skills to check.'; } });
+  return C;
 }
+function scoreOf(ch) { const tot = ch.reduce((n,c)=>n+c.w,0); return Math.round(100 * ch.filter(c=>c.ok).reduce((n,c)=>n+c.w,0) / tot); }
 function updateScore() {
-  const ch = healthChecks(); const pct = Math.round(100 * ch.filter(c=>c.ok).length / ch.length);
+  const ch = healthChecks(); const pct = scoreOf(ch);
   $('#scoreNum').textContent = pct; $('#ring').style.setProperty('--pct', pct + '%');
   $('#ring').style.setProperty('background', `conic-gradient(${pct>=80?'var(--ok)':pct>=50?'var(--accent)':'var(--warn)'} ${pct}%, var(--line) 0)`);
 }
 $('#scoreBtn').onclick = () => {
-  const ch = healthChecks();
-  openModal('Resume health', `<ul class="checks">${ch.map(c=>`<li class="${c.ok?'ok':''}"><span class="ic">${c.ok?'✓':'!'}</span><span class="t">${c.t}<small>${c.s}</small></span></li>`).join('')}</ul>
-    <p style="color:var(--muted);font-size:12.5px;margin:12px 0 0">These checks run locally and mirror what most applicant-tracking filters and first-pass recruiters look for. ${AI.available?'For deeper feedback, use <b>AI tools → Find weak bullets</b>.':''}</p>`,
+  const ch = healthChecks(); const pct = scoreOf(ch);
+  const cats = [...new Set(ch.map(c=>c.cat))];
+  const fails = ch.filter(c=>!c.ok).sort((a,b)=>b.w-a.w);
+  openModal(`Resume health · ${pct}/100`, `
+    ${fails.length ? `<p style="margin:0 0 12px;color:var(--muted)">Biggest wins first: <b style="color:var(--ink)">${fails.slice(0,3).map(f=>f.t).join('</b>, <b style="color:var(--ink)">')}</b>.</p>` : `<p style="margin:0 0 12px">Every check passes. Now tailor it to a posting.</p>`}
+    ${cats.map(cat => { const g = ch.filter(c=>c.cat===cat); const ok = g.filter(c=>c.ok).length; return `<div class="tsec">${cat} <small>${ok}/${g.length}</small></div><ul class="checks">${g.map(c=>`<li class="${c.ok?'ok':''}"><span class="ic">${c.ok?'✓':'!'}</span><span class="t">${c.t}${c.w>=3?' <small style="display:inline;color:var(--warn)">· high impact</small>':''}<small>${c.s}</small></span>${!c.ok && c.go ? `<button class="btn sm" data-go="${c.go}">Fix</button>` : ''}</li>`).join('')}</ul>`; }).join('')}
+    <p style="color:var(--muted);font-size:12.5px;margin:14px 0 0">Checks run locally and weight what recruiters and parsers penalise most: duty-lists without outcomes, missing numbers, clichés, mixed dates and length. ${AI.available?'For wording help, use <b>AI tools → Find weak bullets</b>.':''}</p>`,
     `<button class="btn" data-close>Close</button>`);
+  $('#mBody').onclick = e => { const b = e.target.closest('[data-go]'); if (b) { closeModal(); setActive(b.dataset.go); if (window.innerWidth <= 760) $('#tabs [data-pane=edit]').click(); } };
 };
 
 /* =========================== versions (snapshots) =========================== */
@@ -1090,18 +1170,6 @@ function pdfDef() {
     });
   }
   return { pageSize:'LETTER', pageMargins:[44,40,44,40], content, defaultStyle:{ font, fontSize:fs, lineHeight: (sp < 1 ? 1.14 : 1.22) / (modern ? 1.2207 : 1.522), color:'#1b1b1b' }, info:{ title:`${c.name} — Resume`, author:c.name } };
-}
-/* PDF fonts live in ./fonts and are fetched on first export, then kept in memory. */
-const FONT_FILES = ['Spectral-Regular','Spectral-Bold','Spectral-Italic','Spectral-BoldItalic','Carlito-Regular','Carlito-Bold','Carlito-Italic','Carlito-BoldItalic'];
-let FONT_VFS = null;
-async function loadFonts(family) {
-  FONT_VFS = FONT_VFS || {};
-  const need = FONT_FILES.filter(f => f.startsWith(family) && !FONT_VFS[f + '.ttf']);
-  await Promise.all(need.map(async f => {
-    const r = await fetch(`fonts/${f}.ttf`); if (!r.ok) throw new Error(`fonts/${f}.ttf ${r.status}`);
-    const bytes = new Uint8Array(await r.arrayBuffer()); let s = ''; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
-    FONT_VFS[f + '.ttf'] = btoa(s);
-  }));
 }
 async function exportPDF() {
   if (!window.pdfMake) { toast('PDF library did not load. Use Print › Save as PDF.'); return; }
