@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Folio — resume studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Spectral:ital,wght@0,400;0,600;0,700;1,400&family=Carlito:ital,wght@0,400;0,700;1,400;1,700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.20/build/pdfmake.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@9.5.1/dist/index.iife.js"></script>
+<style>
+:root{
+  --bg:#E6EAEE; --panel:#FFFFFF; --panel2:#F3F5F7; --ink:#15212C; --muted:#5F6B76; --line:#D3D9DF;
+  --accent:#0F6C64; --accent-ink:#FFFFFF; --accent-soft:#DDEDEA;
+  --ai:#6A3FBF; --ai-soft:#EEE8FA; --warn:#B5541B; --warn-soft:#FBEEE4; --ok:#2C7A4B;
+  --paper:#FFFFFF; --paper-ink:#1B1B1B; --shadow:0 12px 40px rgba(20,33,44,.14);
+  --radius:10px; --ui:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1519; --panel:#171F26; --panel2:#1F2830; --ink:#E6EBEF; --muted:#97A3AE; --line:#2A353F;
+  --accent:#3FB3A6; --accent-ink:#0B1F1D; --accent-soft:#173A36; --ai:#B197F0; --ai-soft:#2A2340;
+  --warn:#F0A36B; --warn-soft:#3A2618; --ok:#63C48A; --shadow:0 12px 40px rgba(0,0,0,.5);
+}}
+:root[data-theme="dark"]{
+  --bg:#0F1519; --panel:#171F26; --panel2:#1F2830; --ink:#E6EBEF; --muted:#97A3AE; --line:#2A353F;
+  --accent:#3FB3A6; --accent-ink:#0B1F1D; --accent-soft:#173A36; --ai:#B197F0; --ai-soft:#2A2340;
+  --warn:#F0A36B; --warn-soft:#3A2618; --ok:#63C48A; --shadow:0 12px 40px rgba(0,0,0,.5);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:14px/1.45 var(--ui);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+img{max-width:100%}
+[hidden]{display:none!important}
+.pv-accent{width:26px;height:26px;padding:0;border:1px solid var(--line);border-radius:50%;background:none;cursor:pointer}
+@media (min-width:1181px){.pv-accent{display:none}}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ---- shell ---- */
+.shell{height:100%;display:flex;flex-direction:column}
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+.brand{display:flex;align-items:baseline;gap:8px;margin-right:auto}
+.brand .mark{font-family:"Spectral",Georgia,serif;font-weight:700;font-size:20px;letter-spacing:-.01em}
+.brand .tag{color:var(--muted);font-size:12.5px}
+.score{display:flex;align-items:center;gap:8px;padding:5px 10px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);cursor:pointer;font-size:13px}
+.score b{font-variant-numeric:tabular-nums}
+.ring{width:22px;height:22px;border-radius:50%;background:conic-gradient(var(--accent) var(--pct,0%),var(--line) 0);display:grid;place-items:center}
+.ring::after{content:"";width:14px;height:14px;border-radius:50%;background:var(--panel2)}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel);cursor:pointer;line-height:1.2;white-space:nowrap}
+.btn:hover{background:var(--panel2)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.ai{background:var(--ai-soft);color:var(--ai);border-color:transparent}
+.btn.ai:hover{filter:brightness(.97)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{padding:4px 9px;font-size:12.5px;border-radius:7px}
+.btn.icon{padding:5px 7px}
+.btn[disabled]{opacity:.5;cursor:default}
+.btn.danger{color:var(--warn)}
+.spin{width:12px;height:12px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.menu{position:relative}
+.menu-list{position:absolute;right:0;top:calc(100% + 6px);background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);min-width:220px;padding:6px;display:none;z-index:30}
+.menu.open .menu-list{display:block}
+.menu-list button{display:flex;width:100%;text-align:left;gap:10px;align-items:center;padding:9px 10px;border:0;background:transparent;border-radius:7px;cursor:pointer}
+.menu-list button:hover{background:var(--panel2)}
+.menu-list button small{color:var(--muted);margin-left:auto}
+.menu-list hr{border:0;border-top:1px solid var(--line);margin:6px 0}
+
+/* ---- workspace ---- */
+.work{flex:1;min-height:0;display:grid;grid-template-columns:232px minmax(360px,1fr) minmax(420px,1.1fr);gap:0}
+.rail{border-right:1px solid var(--line);background:var(--panel);overflow:auto;padding:12px 10px}
+.rail h4{margin:8px 8px 6px;font-size:11.5px;font-weight:500;color:var(--muted)}
+.rail .sec{display:flex;align-items:center;gap:8px;padding:8px 8px;border-radius:8px;cursor:pointer;border:0;background:transparent;width:100%;text-align:left}
+.rail .sec:hover{background:var(--panel2)}
+.rail .sec.active{background:var(--accent-soft);color:var(--accent);font-weight:500}
+.rail .sec .n{flex:1}
+.rail .sec .cnt{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.rail .sec .eye{opacity:.55;background:none;border:0;padding:2px 4px;cursor:pointer;border-radius:4px}
+.rail .sec .eye:hover{opacity:1;background:var(--panel)}
+.rail .sec.hidden-sec .n{text-decoration:line-through;opacity:.6}
+.rail .mv{display:flex;flex-direction:column;gap:0;opacity:0}
+.rail .sec:hover .mv{opacity:.7}
+.rail .mv button{border:0;background:none;padding:0 3px;line-height:.8;font-size:10px;cursor:pointer}
+.rail .style-box{margin:14px 8px 0;padding-top:12px;border-top:1px solid var(--line)}
+.rail .row{display:flex;gap:6px;align-items:center;margin:6px 0}
+.rail .row label{flex:1;font-size:13px}
+.swatches{display:flex;gap:6px;flex-wrap:wrap}
+.swatch{width:20px;height:20px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0}
+.swatch.on{border-color:var(--ink)}
+
+.editor{overflow:auto;padding:22px 26px 90px}
+.editor h2{margin:0;font-size:22px;font-weight:600;letter-spacing:-.01em;font-family:"Spectral",Georgia,serif}
+.editor .head{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.editor .head p{margin:2px 0 0;color:var(--muted);flex-basis:100%}
+.editor .head .acts{margin-left:auto;display:flex;gap:8px}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.card.entry .ehead{display:flex;align-items:center;gap:8px;margin:-4px -4px 10px}
+.card.entry .ehead .title{flex:1;font-weight:500}
+.card.entry .ehead .title span{color:var(--muted);font-weight:400}
+.card.entry .ehead .title:empty::before{content:"New entry";color:var(--muted)}
+.card.entry.collapsed .body{display:none}
+.card.entry.off{border-style:dashed}
+.card.entry.off .title{opacity:.5;text-decoration:line-through}
+.bullet .mv{display:flex;flex-direction:column;gap:2px;margin-top:3px}
+.bullet .mv button{border:0;background:none;color:var(--muted);cursor:pointer;font-size:10px;line-height:1;padding:3px 4px;border-radius:4px}
+.bullet .mv button:hover{background:var(--panel2);color:var(--ink)}
+.bullet .mv button[disabled]{opacity:.25;cursor:default}
+.arr{display:flex;align-items:center;gap:8px;padding:10px 6px;border-bottom:1px solid var(--line)}
+.arr:last-child{border:0}
+.arr .n{flex:1}
+.arr.off .n{opacity:.5;text-decoration:line-through}
+.fit{display:flex;gap:14px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);margin-bottom:14px}
+.fit .big{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:16px;flex:none;color:var(--ink)}
+.fit .big::after{content:"";position:absolute;width:44px;height:44px;border-radius:50%;background:var(--panel2)}
+.fit .big span{position:relative;z-index:1}
+.fit .big{position:relative}
+.fit p{margin:0}
+.fit small{color:var(--muted)}
+.tsec{margin:18px 0 8px;font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px}
+.tsec small{color:var(--muted);font-weight:400}
+.req{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.req:last-child{border:0}
+.req .st{flex:none;width:58px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;padding-top:2px}
+.req.met .st{color:var(--ok)}.req.partial .st{color:var(--warn)}.req.missing .st{color:var(--muted)}
+.req small{display:block;color:var(--muted)}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px}
+.opt input{margin-top:3px}
+.opt .body{flex:1;min-width:0}
+.opt .why{font-size:12.5px;color:var(--muted);margin-top:4px}
+.opt textarea{width:100%;border:1px solid var(--line);border-radius:6px;padding:6px 8px;background:var(--panel2);resize:vertical;min-height:52px;line-height:1.45;margin-top:6px}
+.card.entry .caret{transition:transform .15s}
+.card.entry.collapsed .caret{transform:rotate(-90deg)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+.grid .full{grid-column:1/-1}
+.f label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+.f input,.f textarea,.f select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:var(--panel2);color:var(--ink)}
+.f input:focus,.f textarea:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent;background:var(--panel)}
+.f textarea{resize:vertical;min-height:72px;line-height:1.5}
+.f .hint{font-size:12px;color:var(--muted);margin-top:4px}
+.f.chk{display:flex;align-items:center;gap:8px;align-self:end;padding:8px 0}
+.f.chk input{width:auto}
+.bullets{margin-top:12px}
+.bullets .bh{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.bullets .bh label{flex:1;font-size:12px;color:var(--muted)}
+.bullet{display:flex;gap:6px;align-items:flex-start;margin-bottom:6px}
+.bullet .dot{width:6px;height:6px;border-radius:50%;background:var(--muted);margin:12px 4px 0 2px;flex:none}
+.bullet textarea{flex:1;min-height:38px;padding:7px 10px;border:1px solid var(--line);border-radius:7px;background:var(--panel2);color:var(--ink);resize:none;line-height:1.45;overflow:hidden}
+.bullet textarea:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent;background:var(--panel)}
+.bullet .x{border:0;background:none;color:var(--muted);cursor:pointer;padding:8px 4px;border-radius:6px}
+.bullet .x:hover{color:var(--warn);background:var(--warn-soft)}
+.bullet.weak textarea{border-color:var(--warn)}
+.empty{border:1px dashed var(--line);border-radius:var(--radius);padding:26px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--ink);font-weight:500;margin-bottom:4px}
+
+/* ---- preview ---- */
+.preview{overflow:auto;padding:24px;display:flex;flex-direction:column;align-items:center;gap:12px;background:var(--bg)}
+.pv-tools{display:flex;gap:8px;align-items:center;width:100%;max-width:816px;justify-content:space-between;color:var(--muted);font-size:12.5px;flex-wrap:wrap}
+.pv-tools>span:first-child{flex:1 1 auto;white-space:nowrap}
+.paper-wrap{width:100%;max-width:816px}
+.paper{background:var(--paper);color:var(--paper-ink);width:816px;min-height:1056px;padding:59px 59px;box-shadow:var(--shadow);transform-origin:top left;position:relative}
+.paper *{box-sizing:border-box;-webkit-text-size-adjust:none;text-size-adjust:none}
+.pagebreak{position:absolute;left:0;right:0;border-top:1px dashed #c8b98b;pointer-events:none}
+.pagebreak::after{content:"page break (approx.)";position:absolute;right:8px;top:-9px;font:10px var(--ui);color:#a08a4a;background:var(--paper);padding:0 4px}
+
+/* resume templates: shared */
+.r{font-size:var(--rs,10.5pt);line-height:1.22;--sp:1}
+.r .name{font-weight:700;letter-spacing:-.01em;margin:0}
+.r .role{margin:1px 0 0;color:#444}
+.r .contact{margin:5px 0 0;color:#333;display:flex;flex-wrap:wrap;gap:2px 0}
+.r .contact span+span::before{content:"|";margin:0 7px;color:#999}
+.r .contact a{color:inherit;text-decoration:none}
+.r h3{margin:calc(11px * var(--sp)) 0 calc(4px * var(--sp));font-size:1.02em;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.r .item{margin-bottom:calc(6px * var(--sp))}
+.r .line{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.r .line .l{font-weight:700}
+.r .line .r2{color:#333;white-space:nowrap}
+.r .sub{display:flex;justify-content:space-between;gap:10px;font-style:italic;color:#333}
+.r ul{margin:2px 0 0;padding-left:14px}
+.r li{margin:calc(1px * var(--sp)) 0;padding-left:1px}
+.r p{margin:0}
+.r .sk{margin:1px 0}
+.r .sk b{font-weight:700}
+.r .cert{display:flex;justify-content:space-between;gap:10px}
+/* classic: serif, centered header, rule under headings */
+.r.classic{font-family:"Spectral",Georgia,"Times New Roman",serif}
+.r.classic .hdr{text-align:center;border-bottom:1.5px solid var(--racc);padding-bottom:8px}
+.r.classic .name{font-size:2.15em}
+.r.classic .contact{justify-content:center}
+.r.classic h3{border-bottom:.75px solid #999;padding-bottom:2px;color:var(--racc)}
+/* modern: sans, left header with accent block */
+.r.modern{font-family:"Carlito",Calibri,"Segoe UI",Arial,sans-serif;font-size:calc(var(--rs,10.5pt) * 1.06)}
+.r.modern .hdr{border-left:6px solid var(--racc);padding-left:12px}
+.r.modern .name{font-size:2.3em;line-height:1.05;color:var(--racc)}
+.r.modern h3{color:var(--racc);letter-spacing:.08em;font-size:.95em;margin-top:calc(13px * var(--sp))}
+.r.modern h3::after{content:"";display:block;height:2px;background:var(--racc);width:28px;margin-top:3px}
+
+/* ---- modal ---- */
+.overlay{position:fixed;inset:0;background:rgba(10,20,30,.45);display:none;align-items:flex-end;justify-content:center;z-index:50;padding:0}
+.overlay.open{display:flex}
+.modal{background:var(--panel);width:100%;max-width:720px;max-height:min(88vh,88%);border-radius:14px 14px 0 0;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+@media (min-width:700px){.overlay{align-items:center;padding:20px}.modal{border-radius:14px}}
+.modal header{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.modal header h3{margin:0;font-size:16px;font-weight:600;flex:1}
+.modal .mbody{padding:16px 18px;overflow:auto}
+.modal footer{display:flex;gap:8px;justify-content:flex-end;padding:12px 18px;border-top:1px solid var(--line)}
+.status{display:flex;gap:10px;align-items:center;color:var(--muted);padding:16px 0}
+.status .spin{color:var(--ai)}
+.sugg{border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px;display:grid;grid-template-columns:auto 1fr;gap:6px 12px}
+.sugg input[type=checkbox]{margin-top:3px}
+.sugg .ctx{font-size:12px;color:var(--muted);grid-column:2}
+.sugg .old{color:var(--muted);text-decoration:line-through;grid-column:2}
+.sugg .new{grid-column:2}
+.sugg .why{grid-column:2;font-size:12.5px;color:var(--warn)}
+.sugg textarea{width:100%;border:1px solid var(--line);border-radius:6px;padding:6px 8px;background:var(--panel2);resize:vertical;min-height:52px;line-height:1.45}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);border-radius:999px;padding:4px 10px;cursor:pointer;background:var(--panel2);font-size:13px;display:inline-flex;gap:6px;align-items:center}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.chip.present{background:transparent;color:var(--muted);cursor:default}
+.checks{list-style:none;margin:0;padding:0}
+.checks li{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.checks li:last-child{border:0}
+.checks .ic{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;flex:none;background:var(--warn-soft);color:var(--warn)}
+.checks li.ok .ic{background:var(--accent-soft);color:var(--ok)}
+.checks .t{flex:1}
+.checks .t small{display:block;color:var(--muted)}
+.diff{display:grid;gap:10px}
+.diff .box{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--panel2);white-space:pre-wrap;line-height:1.5}
+.diff .box.new{background:var(--ai-soft);border-color:transparent}
+.diff label{font-size:12px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:9px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:60;max-width:90vw}
+.toast.show{opacity:1}
+
+/* ---- mobile / tablet ---- */
+.tabs{display:none}
+@media (max-width:1180px){
+  .work{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .rail{display:none}
+  .editor{padding:16px 18px 90px}
+  .secbar{display:flex;gap:6px;overflow-x:auto;padding:0 0 12px;margin:0 0 6px;scrollbar-width:none}
+  .secbar::-webkit-scrollbar{display:none}
+  .secbar .chip{white-space:nowrap}
+}
+@media (min-width:1181px){.secbar{display:none}}
+@media (max-width:760px){
+  .work{grid-template-columns:1fr}
+  .work>.editor,.work>.preview{display:none}
+  .work.show-edit>.editor,.work.show-pv>.preview{display:block}
+  .work.show-pv>.preview{display:flex}
+  .tabs{display:flex;position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);padding:6px 10px calc(6px + env(safe-area-inset-bottom,0px));z-index:20;gap:6px}
+  .tabs button{flex:1;padding:9px;border:0;background:transparent;border-radius:8px;color:var(--muted)}
+  .tabs button.on{background:var(--accent-soft);color:var(--accent);font-weight:500}
+  .topbar{padding:8px 12px;gap:8px}
+  .brand .tag,.topbar .hide-m{display:none}
+  .preview{padding:12px 12px 80px}
+  .grid{grid-template-columns:1fr}
+  .editor .head .acts{margin-left:0}
+}
+@media print{
+  body{background:#fff}
+  .topbar,.rail,.editor,.tabs,.pv-tools,.pagebreak,.toast,.overlay{display:none!important}
+  .work{display:block}
+  .preview{display:block!important;padding:0;overflow:visible}
+  .paper{box-shadow:none;transform:none!important;width:auto;min-height:0;padding:0.55in 0.6in}
+  @page{size:letter;margin:0}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar">
+    <div class="brand"><span class="mark">Folio</span><span class="tag">resume studio</span></div>
+    <button class="score" id="scoreBtn" title="Resume health"><span class="ring" id="ring"></span><b id="scoreNum">–</b><span class="hide-m">/100</span></button>
+    <button class="btn ai" id="aiMenuBtn"><span>✦</span><span class="hide-m">AI tools</span></button>
+    <div class="menu" id="dlMenu">
+      <button class="btn primary" id="dlBtn">Download <span class="hide-m">▾</span></button>
+      <div class="menu-list">
+        <button data-act="pdf">PDF <small>text-based, ATS-safe</small></button>
+        <button data-act="docx">Word document <small>.docx</small></button>
+        <button data-act="print">Print…</button>
+        <hr>
+        <button data-act="versions">Versions… <small>save / switch</small></button>
+        <button data-act="json">Back up data <small>.json</small></button>
+        <button data-act="import">Restore from backup…</button>
+        <button data-act="importText">Import from pasted resume… <small>AI</small></button>
+        <hr>
+        <button data-act="sample">Load sample resume</button>
+        <button data-act="reset">Clear everything</button>
+      </div>
+    </div>
+    <input type="file" id="importFile" accept="application/json,.json" hidden>
+  </div>
+
+  <div class="work show-edit" id="work">
+    <aside class="rail" id="rail"></aside>
+    <main class="editor" id="editor"></main>
+    <section class="preview" id="preview">
+      <div class="pv-tools">
+        <span id="pvInfo">Live preview</span>
+        <span class="row" style="display:flex;gap:8px;align-items:center">
+          <label for="pvTemplate">Style</label>
+          <select id="pvTemplate" class="btn sm"><option value="classic">Classic serif</option><option value="modern">Modern sans</option></select>
+          <input type="color" id="pvAccent" class="pv-accent" aria-label="Accent color">
+          <label for="pvSize">Size</label>
+          <select id="pvSize" class="btn sm"><option value="9">Compact</option><option value="10.5" selected>Normal</option><option value="11.5">Roomy</option></select>
+        </span>
+      </div>
+      <div class="paper-wrap" id="paperWrap"><div class="paper" id="paper"></div></div>
+    </section>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button class="on" data-pane="edit">Edit</button>
+    <button data-pane="pv">Preview</button>
+  </nav>
+</div>
+
+<div class="overlay" id="overlay"><div class="modal" role="dialog" aria-modal="true">
+  <header><h3 id="mTitle">Title</h3><button class="btn ghost icon" id="mClose" aria-label="Close">✕</button></header>
+  <div class="mbody" id="mBody"></div>
+  <footer id="mFoot"></footer>
+</div></div>
+<div class="toast" id="toast"></div>
+<script>
+/* =========================== state =========================== */
+const uid = () => Math.random().toString(36).slice(2, 9);
+const spacing = () => ({ '9': .68, '10.5': 1, '11.5': 1.15 })[String(S.settings.size)] ?? 1;
+const SECTIONS = {
+  contact:        { label: 'Contact',        single: true },
+  summary:        { label: 'Summary',        single: true },
+  experience:     { label: 'Experience' },
+  education:      { label: 'Education' },
+  projects:       { label: 'Projects' },
+  skills:         { label: 'Skills' },
+  certifications: { label: 'Certifications' },
+  involvement:    { label: 'Involvement' },
+};
+const DEFAULT_ORDER = ['summary','experience','education','projects','skills','certifications','involvement'];
+const blank = () => ({
+  contact: { name:'', title:'', email:'', phone:'', location:'', website:'', linkedin:'', github:'' },
+  summary: '',
+  experience: [], education: [], projects: [], skills: [], certifications: [], involvement: [],
+  settings: { template:'classic', size:'10.5', accent:'#0F6C64', order:[...DEFAULT_ORDER], hidden:{} },
+});
+const newEntry = {
+  experience:     () => ({ id:uid(), role:'', company:'', location:'', start:'', end:'', current:false, bullets:[''] }),
+  education:      () => ({ id:uid(), school:'', degree:'', field:'', location:'', start:'', end:'', gpa:'', bullets:[] }),
+  projects:       () => ({ id:uid(), name:'', link:'', tech:'', start:'', end:'', bullets:[''] }),
+  skills:         () => ({ id:uid(), category:'', items:'' }),
+  certifications: () => ({ id:uid(), name:'', issuer:'', date:'', link:'' }),
+  involvement:    () => ({ id:uid(), role:'', org:'', location:'', start:'', end:'', bullets:[''] }),
+};
+const SAMPLE = {
+  contact:{ name:'Jordan Reyes', title:'Product Engineer', email:'jordan.reyes@example.com', phone:'(415) 555-0142', location:'Oakland, CA', website:'jordanreyes.dev', linkedin:'linkedin.com/in/jordanreyes', github:'github.com/jreyes' },
+  summary:'Product engineer with 6 years building consumer web apps end to end. Comfortable owning a feature from user research through launch, and known for turning ambiguous asks into shipped, measured improvements.',
+  experience:[
+    { id:uid(), role:'Senior Software Engineer', company:'Lumen Health', location:'San Francisco, CA', start:'Mar 2022', end:'', current:true, bullets:[
+      'Led migration of the patient portal from a legacy PHP monolith to a React + Node service architecture, cutting p95 page load from 3.1 s to 0.9 s for 180k monthly users',
+      'Designed and shipped an appointment-reminder pipeline (SQS, Lambda, Twilio) that reduced no-show rates 22% across 40 clinics',
+      'Mentored four engineers through promotion cycles; introduced RFC process adopted by three other teams' ] },
+    { id:uid(), role:'Software Engineer', company:'Brightline Labs', location:'Remote', start:'Jun 2019', end:'Feb 2022', current:false, bullets:[
+      'Built the billing dashboard used by 2,400 small-business customers, including Stripe integration and usage-based invoicing',
+      'Worked on the frontend and helped with testing',
+      'Reduced CI runtime from 34 min to 11 min by parallelizing Jest suites and caching Docker layers' ] },
+  ],
+  education:[ { id:uid(), school:'University of California, Davis', degree:'B.S.', field:'Computer Science', location:'Davis, CA', start:'2015', end:'2019', gpa:'3.7', bullets:[] } ],
+  projects:[ { id:uid(), name:'Trailhead', link:'github.com/jreyes/trailhead', tech:'TypeScript, SvelteKit, PostGIS', start:'2024', end:'', bullets:[
+    'Open-source trip planner for long-distance hikers; 1.2k GitHub stars and ~900 weekly active users',
+    'Implemented offline map tiles with service workers, cutting mobile data usage by 70%' ] } ],
+  skills:[
+    { id:uid(), category:'Languages', items:'TypeScript, JavaScript, Python, SQL' },
+    { id:uid(), category:'Frameworks', items:'React, Next.js, Node.js, SvelteKit, Express' },
+    { id:uid(), category:'Infrastructure', items:'AWS (Lambda, SQS, RDS), Docker, GitHub Actions, Terraform' },
+  ],
+  certifications:[ { id:uid(), name:'AWS Certified Developer – Associate', issuer:'Amazon Web Services', date:'2023', link:'' } ],
+  involvement:[ { id:uid(), role:'Volunteer Mentor', org:'Code for Oakland', location:'Oakland, CA', start:'2021', end:'', bullets:[ 'Coach a cohort of 8 career-changers through their first full-stack projects each quarter' ] } ],
+  settings:{ template:'classic', size:'10.5', accent:'#0F6C64', order:[...DEFAULT_ORDER], hidden:{} },
+};
+
+let S = blank();
+let active = 'contact';
+let collapsed = {};
+let weakMarks = {};   // `${section}:${id}:${idx}` -> reason
+const KEY = 'folio-resume-v1';
+
+function load() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) { const p = JSON.parse(raw); S = Object.assign(blank(), p); S.settings = Object.assign(blank().settings, p.settings || {}); }
+  } catch (e) { S = blank(); }
+  if (!S.settings.order || S.settings.order.length !== DEFAULT_ORDER.length) S.settings.order = [...DEFAULT_ORDER];
+}
+let saveT;
+function save() {
+  clearTimeout(saveT);
+  saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }, 250);
+}
+function commit(rerenderEditor) { save(); renderPreview(); renderRail(); updateScore(); if (rerenderEditor) renderEditor(); }
+
+/* =========================== helpers =========================== */
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2600); }
+function dates(e) {
+  const end = e.current ? 'Present' : (e.end || '');
+  if (e.start && end) return `${e.start} – ${end}`;
+  return e.start || end || '';
+}
+const vis = sec => Array.isArray(S[sec]) ? S[sec].filter(e => !e.off) : [];
+function hasBullets(e) { return (e.bullets || []).some(b => b.trim()); }
+function autoGrow(t) { t.style.height = 'auto'; t.style.height = (t.scrollHeight + 2) + 'px'; }
+function entryTitle(sec, e) {
+  switch (sec) {
+    case 'experience': return [e.role, e.company].filter(Boolean).map(esc).join(' <span>at</span> ');
+    case 'education': return [ [e.degree, e.field].filter(Boolean).join(' in '), e.school ].filter(Boolean).map(esc).join(' <span>·</span> ');
+    case 'projects': return esc(e.name);
+    case 'skills': return esc(e.category || e.items.split(',')[0] || '');
+    case 'certifications': return esc(e.name);
+    case 'involvement': return [e.role, e.org].filter(Boolean).map(esc).join(' <span>at</span> ');
+  }
+  return '';
+}
+const sectionCount = sec => SECTIONS[sec].single ? (sec === 'summary' ? (S.summary.trim() ? 1 : 0) : (S.contact.name ? 1 : 0)) : vis(sec).length;
+
+/* =========================== rail (desktop) + secbar (mobile) =========================== */
+function renderRail() {
+  const rail = $('#rail');
+  const acc = S.settings.accent;
+  const secBtn = (sec, i, movable) => {
+    const hidden = !!S.settings.hidden[sec];
+    return `<div class="sec ${active===sec?'active':''} ${hidden?'hidden-sec':''}" data-sec="${sec}" role="button" tabindex="0">
+      <span class="n">${SECTIONS[sec].label}</span>
+      <span class="cnt">${sectionCount(sec) || ''}</span>
+      ${movable ? `<span class="mv"><button data-mv="-1" title="Move up">▲</button><button data-mv="1" title="Move down">▼</button></span>` : ''}
+      ${sec !== 'contact' ? `<button class="eye" data-eye="${sec}" title="${hidden?'Show on resume':'Hide from resume'}">${hidden?'◌':'◉'}</button>` : ''}
+    </div>`;
+  };
+  const colors = ['#0F6C64','#1F3A5F','#5B2A86','#8B1E3F','#B25A16','#2E7D32','#1B1B1B'];
+  rail.innerHTML = `<h4>Sections</h4>${secBtn('contact')}${S.settings.order.map((s,i)=>secBtn(s,i,true)).join('')}
+    <div class="style-box"><h4 style="margin-left:0">Style</h4>
+      <div class="row"><label>Accent</label><span class="swatches">${colors.map(c=>`<button class="swatch ${c===acc?'on':''}" style="background:${c}" data-color="${c}" aria-label="${c}"></button>`).join('')}</span></div>
+      <div class="row"><label>Theme</label><select id="themeSel" class="btn sm"><option value="">System</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
+    </div>`;
+  $('#themeSel').value = document.documentElement.dataset.theme || '';
+  rail.onclick = e => {
+    const mv = e.target.closest('[data-mv]');
+    const eye = e.target.closest('[data-eye]');
+    const sw = e.target.closest('[data-color]');
+    const sec = e.target.closest('[data-sec]');
+    if (sw) { S.settings.accent = sw.dataset.color; commit(); return; }
+    if (mv) { const s = sec.dataset.sec, o = S.settings.order, i = o.indexOf(s), j = i + +mv.dataset.mv; if (j>=0 && j<o.length) { [o[i],o[j]]=[o[j],o[i]]; commit(); } return; }
+    if (eye) { S.settings.hidden[eye.dataset.eye] = !S.settings.hidden[eye.dataset.eye]; commit(); return; }
+    if (sec) { setActive(sec.dataset.sec); }
+  };
+  rail.onkeydown = e => { const sec = e.target.closest('[data-sec]'); if (sec && (e.key==='Enter'||e.key===' ')) { e.preventDefault(); setActive(sec.dataset.sec); } };
+  $('#themeSel').onchange = e => { if (e.target.value) document.documentElement.dataset.theme = e.target.value; else delete document.documentElement.dataset.theme; try { localStorage.setItem('folio-theme', e.target.value); } catch(_){} };
+}
+function setActive(sec) { active = sec; collapsed = {}; renderRail(); renderEditor(); $('#editor').scrollTop = 0; $('.secbar .chip.on')?.scrollIntoView({ block:'nearest', inline:'nearest' }); }
+
+/* =========================== editor =========================== */
+function field(sec, id, key, label, val, opts={}) {
+  const ph = opts.ph ? `placeholder="${esc(opts.ph)}"` : '';
+  const cls = opts.full ? 'f full' : 'f';
+  if (opts.type === 'check') return `<div class="f chk"><input type="checkbox" id="${id}-${key}" data-sec="${sec}" data-id="${id}" data-key="${key}" ${val?'checked':''}><label for="${id}-${key}" style="margin:0;color:var(--ink)">${label}</label></div>`;
+  if (opts.type === 'textarea') return `<div class="${cls}"><label for="${id}-${key}">${label}</label><textarea id="${id}-${key}" data-sec="${sec}" data-id="${id}" data-key="${key}" ${ph}>${esc(val)}</textarea>${opts.hint?`<div class="hint">${opts.hint}</div>`:''}</div>`;
+  return `<div class="${cls}"><label for="${id}-${key}">${label}</label><input id="${id}-${key}" type="${opts.type||'text'}" data-sec="${sec}" data-id="${id}" data-key="${key}" value="${esc(val)}" ${ph}>${opts.hint?`<div class="hint">${opts.hint}</div>`:''}</div>`;
+}
+function bulletsBlock(sec, e) {
+  const bl = e.bullets || [];
+  return `<div class="bullets"><div class="bh"><label>Bullet points</label>
+      <button class="btn sm ai" data-ai="bullets" data-sec="${sec}" data-id="${e.id}" ${AI.available?'':'hidden'}>✦ Improve bullets</button>
+      <button class="btn sm" data-addb="${e.id}">+ Bullet</button></div>
+    ${bl.map((b,i)=>`<div class="bullet ${weakMarks[`${sec}:${e.id}:${i}`]?'weak':''}" title="${esc(weakMarks[`${sec}:${e.id}:${i}`]||'')}"><span class="mv"><button data-mvb="${i}" data-dir="-1" data-id="${e.id}" aria-label="Move bullet up" ${i===0?'disabled':''}>▲</button><button data-mvb="${i}" data-dir="1" data-id="${e.id}" aria-label="Move bullet down" ${i===bl.length-1?'disabled':''}>▼</button></span><textarea rows="1" data-sec="${sec}" data-id="${e.id}" data-bullet="${i}" placeholder="Start with a strong verb; add a number if you can">${esc(b)}</textarea><button class="x" data-delb="${i}" data-id="${e.id}" aria-label="Remove bullet">✕</button></div>`).join('')}
+  </div>`;
+}
+function entryBody(sec, e) {
+  switch (sec) {
+    case 'experience': return `<div class="grid">
+      ${field(sec,e.id,'role','Job title',e.role,{ph:'Software Engineer'})}${field(sec,e.id,'company','Company',e.company,{ph:'Acme Corp'})}
+      ${field(sec,e.id,'location','Location',e.location,{ph:'City, ST or Remote'})}
+      ${field(sec,e.id,'start','Start',e.start,{ph:'Jun 2022'})}${field(sec,e.id,'end','End',e.end,{ph:'Aug 2024'})}${field(sec,e.id,'current','I currently work here',e.current,{type:'check'})}
+      </div>${bulletsBlock(sec,e)}`;
+    case 'education': return `<div class="grid">
+      ${field(sec,e.id,'school','School',e.school,{ph:'University of …'})}${field(sec,e.id,'location','Location',e.location)}
+      ${field(sec,e.id,'degree','Degree',e.degree,{ph:'B.S.'})}${field(sec,e.id,'field','Field of study',e.field,{ph:'Computer Science'})}
+      ${field(sec,e.id,'start','Start',e.start,{ph:'2018'})}${field(sec,e.id,'end','End (or expected)',e.end,{ph:'2022'})}${field(sec,e.id,'gpa','GPA (optional)',e.gpa,{ph:'3.8'})}
+      </div>${bulletsBlock(sec,e)}`;
+    case 'projects': return `<div class="grid">
+      ${field(sec,e.id,'name','Project name',e.name)}${field(sec,e.id,'link','Link',e.link,{ph:'github.com/you/project'})}
+      ${field(sec,e.id,'tech','Technologies',e.tech,{ph:'React, Node.js, PostgreSQL',full:true})}
+      ${field(sec,e.id,'start','Start',e.start)}${field(sec,e.id,'end','End',e.end)}
+      </div>${bulletsBlock(sec,e)}`;
+    case 'skills': return `<div class="grid">
+      ${field(sec,e.id,'category','Category',e.category,{ph:'Languages'})}
+      ${field(sec,e.id,'items','Skills (comma separated)',e.items,{ph:'Python, SQL, Go',full:true,type:'textarea'})}</div>`;
+    case 'certifications': return `<div class="grid">
+      ${field(sec,e.id,'name','Certification',e.name)}${field(sec,e.id,'issuer','Issuer',e.issuer)}
+      ${field(sec,e.id,'date','Date',e.date,{ph:'2024'})}${field(sec,e.id,'link','Link (optional)',e.link)}</div>`;
+    case 'involvement': return `<div class="grid">
+      ${field(sec,e.id,'role','Role',e.role,{ph:'Treasurer'})}${field(sec,e.id,'org','Organization',e.org,{ph:'Robotics Club'})}
+      ${field(sec,e.id,'location','Location',e.location)}<div></div>
+      ${field(sec,e.id,'start','Start',e.start)}${field(sec,e.id,'end','End',e.end)}
+      </div>${bulletsBlock(sec,e)}`;
+  }
+}
+const SEC_HELP = {
+  contact: 'Only what a recruiter needs to reach you. Links without https:// look cleaner.',
+  summary: 'Two or three sentences: who you are, what you do best, and the kind of role you want. Skip it if you have under two years of experience.',
+  experience: 'Most recent first. Each bullet: a strong verb, what you did, and the measurable result.',
+  education: 'Degree, school, dates. Add GPA only if it is 3.5 or higher, and coursework only if you are a student.',
+  projects: 'Side projects, open source, or class projects that show skills your jobs do not.',
+  skills: 'Group by category so the reader can scan. Match the wording in the job posting.',
+  certifications: 'Name, issuer, and year. Include the credential only if it is current.',
+  involvement: 'Clubs, volunteering, leadership. Treat it like experience: what did you do and what changed?',
+};
+function renderEditor() {
+  const ed = $('#editor');
+  const sec = active;
+  const prevScroll = $('.secbar', ed)?.scrollLeft ?? 0;
+  const secbar = `<div class="secbar">${['contact',...S.settings.order].map(s=>`<button class="chip ${s===active?'on':''}" data-sec="${s}">${SECTIONS[s].label}${S.settings.hidden[s]?' ◌':''}</button>`).join('')}<button class="chip" data-arrange="1">⇅ Arrange</button></div>`;
+  let body = '';
+  if (sec === 'contact') {
+    const c = S.contact;
+    body = `<div class="card"><div class="grid">
+      ${field(sec,'c','name','Full name',c.name,{ph:'Jordan Reyes'})}${field(sec,'c','title','Headline / target role',c.title,{ph:'Product Engineer'})}
+      ${field(sec,'c','email','Email',c.email,{type:'email'})}${field(sec,'c','phone','Phone',c.phone)}
+      ${field(sec,'c','location','Location',c.location,{ph:'City, ST'})}${field(sec,'c','website','Website',c.website)}
+      ${field(sec,'c','linkedin','LinkedIn',c.linkedin,{ph:'linkedin.com/in/you'})}${field(sec,'c','github','GitHub',c.github,{ph:'github.com/you'})}
+    </div></div>`;
+  } else if (sec === 'summary') {
+    body = `<div class="card">${field(sec,'s','summary','Professional summary',S.summary,{type:'textarea',full:true,ph:'Product engineer with 6 years building…'})}
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn ai" data-ai="summary" ${AI.available?'':'hidden'}>✦ Improve with AI</button>
+        <button class="btn ai" data-ai="summary-generate" ${AI.available?'':'hidden'}>✦ Write from my experience</button>
+      </div></div>`;
+  } else {
+    const list = S[sec];
+    body = list.length ? list.map((e,i)=>`<div class="card entry ${collapsed[e.id]?'collapsed':''} ${e.off?'off':''}" data-entry="${e.id}">
+        <div class="ehead"><button class="btn ghost icon caret" data-toggle="${e.id}" aria-label="Collapse">▾</button>
+          <div class="title">${entryTitle(sec,e)}</div>
+          <button class="btn ghost icon" data-off="${e.id}" title="${e.off?'Show on resume':'Hide from resume'}">${e.off?'◌':'◉'}</button>
+          <button class="btn ghost icon" data-move="-1" data-id="${e.id}" title="Move up" ${i===0?'disabled':''}>↑</button>
+          <button class="btn ghost icon" data-move="1" data-id="${e.id}" title="Move down" ${i===list.length-1?'disabled':''}>↓</button>
+          <button class="btn ghost icon danger" data-del="${e.id}" title="Delete entry">🗑</button></div>
+        <div class="body">${entryBody(sec,e)}</div></div>`).join('')
+      : `<div class="empty"><b>Nothing here yet</b>Add your first ${SECTIONS[sec].label.toLowerCase()} entry.</div>`;
+    body += `<button class="btn" data-add="${sec}">+ Add ${SECTIONS[sec].label.replace(/s$/,'').toLowerCase()}</button>`;
+  }
+  ed.innerHTML = `${secbar}<div class="head"><h2>${SECTIONS[sec].label}</h2>
+    <div class="acts">${sec!=='contact'?`<button class="btn sm" data-hidesec="${sec}">${S.settings.hidden[sec]?'Show on resume':'Hide from resume'}</button>`:''}<button class="btn sm" data-arrange="1">⇅ Arrange sections</button></div>
+    <p>${SEC_HELP[sec]}</p></div>${body}`;
+  const sb = $('.secbar', ed); if (sb) sb.scrollLeft = prevScroll;
+  $$('.bullet textarea', ed).forEach(autoGrow);
+  $$('.f textarea', ed).forEach(t => { t.style.minHeight = '96px'; });
+}
+$('#editor').addEventListener('input', e => {
+  const t = e.target;
+  const sec = t.dataset.sec;
+  if (t.dataset.bullet !== undefined) {
+    const en = S[sec].find(x => x.id === t.dataset.id); en.bullets[+t.dataset.bullet] = t.value; autoGrow(t);
+    delete weakMarks[`${sec}:${en.id}:${t.dataset.bullet}`]; t.closest('.bullet').classList.remove('weak');
+  } else if (t.dataset.key) {
+    if (sec === 'contact') S.contact[t.dataset.key] = t.value;
+    else if (sec === 'summary') S.summary = t.value;
+    else { const en = S[sec].find(x => x.id === t.dataset.id); let v = t.type === 'checkbox' ? t.checked : t.value;
+      if (typeof v === 'string' && /%[0-9A-Fa-f]{2}/.test(v) && !/\s/.test(v)) { try { v = decodeURIComponent(v); t.value = v; } catch(_){} }
+      en[t.dataset.key] = v;
+      const title = t.closest('.card').querySelector('.title'); if (title) title.innerHTML = entryTitle(sec, en); }
+  } else return;
+  save(); renderPreview(); updateScore();
+});
+$('#editor').addEventListener('change', e => { if (e.target.type === 'checkbox') { renderEditor(); commit(); } });
+$('#editor').addEventListener('keydown', e => {
+  const t = e.target;
+  if (t.dataset.bullet !== undefined && e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault(); const en = S[active].find(x => x.id === t.dataset.id); const i = +t.dataset.bullet;
+    en.bullets.splice(i+1, 0, ''); commit(true); $(`[data-id="${en.id}"][data-bullet="${i+1}"]`)?.focus();
+  }
+  if (t.dataset.bullet !== undefined && e.key === 'Backspace' && t.value === '') {
+    const en = S[active].find(x => x.id === t.dataset.id); const i = +t.dataset.bullet;
+    if (en.bullets.length > 1) { e.preventDefault(); en.bullets.splice(i,1); commit(true); $(`[data-id="${en.id}"][data-bullet="${Math.max(0,i-1)}"]`)?.focus(); }
+  }
+});
+$('#editor').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const d = b.dataset;
+  if (d.arrange) return arrangeModal();
+  if (d.sec && b.classList.contains('chip')) return setActive(d.sec);
+  if (d.add) { const en = newEntry[d.add](); S[d.add].push(en); commit(true); $(`.card[data-entry="${en.id}"] input`)?.focus(); }
+  else if (d.del) { const sec = active; ask('Delete entry', 'Remove this entry from your resume? This can’t be undone.', 'Delete').then(ok => { if (ok) { S[sec] = S[sec].filter(x => x.id !== d.del); commit(true); } }); }
+  else if (d.move) { const a = S[active], i = a.findIndex(x => x.id === d.id), j = i + +d.move; if (j >= 0 && j < a.length) { [a[i],a[j]] = [a[j],a[i]]; commit(true); } }
+  else if (d.off) { const en = S[active].find(x => x.id === d.off); en.off = !en.off; commit(true); }
+  else if (d.mvb !== undefined) { const en = S[active].find(x => x.id === d.id); const i = +d.mvb, j = i + +d.dir; if (j >= 0 && j < en.bullets.length) { [en.bullets[i], en.bullets[j]] = [en.bullets[j], en.bullets[i]]; commit(true); $(`[data-id="${en.id}"][data-bullet="${j}"]`)?.focus(); } }
+  else if (d.toggle) { collapsed[d.toggle] = !collapsed[d.toggle]; b.closest('.card').classList.toggle('collapsed'); }
+  else if (d.addb) { const en = S[active].find(x => x.id === d.addb); en.bullets.push(''); commit(true); $(`[data-id="${en.id}"][data-bullet="${en.bullets.length-1}"]`)?.focus(); }
+  else if (d.delb !== undefined) { const en = S[active].find(x => x.id === d.id); en.bullets.splice(+d.delb, 1); commit(true); }
+  else if (d.hidesec) { S.settings.hidden[d.hidesec] = !S.settings.hidden[d.hidesec]; commit(true); }
+  else if (d.ai) { AI.run(d.ai, d); }
+});
+
+/* =========================== preview =========================== */
+function contactLine(c) {
+  const parts = [];
+  if (c.email) parts.push(`<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>`);
+  if (c.phone) parts.push(esc(c.phone));
+  if (c.location) parts.push(esc(c.location));
+  ['website','linkedin','github'].forEach(k => { if (c[k]) parts.push(`<a href="https://${esc(c[k].replace(/^https?:\/\//,''))}">${esc(c[k].replace(/^https?:\/\//,''))}</a>`); });
+  return parts.map(p => `<span>${p}</span>`).join('');
+}
+function sectionHTML(sec) {
+  const items = vis(sec);
+  const ul = e => hasBullets(e) ? `<ul>${e.bullets.filter(b=>b.trim()).map(b=>`<li>${esc(b)}</li>`).join('')}</ul>` : '';
+  switch (sec) {
+    case 'summary': return S.summary.trim() ? `<h3>Summary</h3><p>${esc(S.summary)}</p>` : '';
+    case 'experience': return items.length ? `<h3>Experience</h3>` + items.map(e => `<div class="item"><div class="line"><span class="l">${esc(e.role)}</span><span class="r2">${esc(dates(e))}</span></div><div class="sub"><span>${esc(e.company)}</span><span>${esc(e.location)}</span></div>${ul(e)}</div>`).join('') : '';
+    case 'education': return items.length ? `<h3>Education</h3>` + items.map(e => `<div class="item"><div class="line"><span class="l">${esc(e.school)}</span><span class="r2">${esc(dates(e))}</span></div><div class="sub"><span>${esc([[e.degree,e.field].filter(Boolean).join(' in '), e.gpa?`GPA ${e.gpa}`:''].filter(Boolean).join(', '))}</span><span>${esc(e.location)}</span></div>${ul(e)}</div>`).join('') : '';
+    case 'projects': return items.length ? `<h3>Projects</h3>` + items.map(e => `<div class="item"><div class="line"><span class="l">${esc(e.name)}${e.tech?` <span style="font-weight:400;color:#444">| ${esc(e.tech)}</span>`:''}</span><span class="r2">${esc(dates(e))}</span></div>${e.link?`<div class="sub"><span>${esc(e.link.replace(/^https?:\/\//,''))}</span></div>`:''}${ul(e)}</div>`).join('') : '';
+    case 'skills': return items.length ? `<h3>Skills</h3>` + items.map(e => `<p class="sk">${e.category?`<b>${esc(e.category)}:</b> `:''}${esc(e.items)}</p>`).join('') : '';
+    case 'certifications': return items.length ? `<h3>Certifications</h3>` + items.map(e => `<div class="cert"><span><b>${esc(e.name)}</b>${e.issuer?`, ${esc(e.issuer)}`:''}</span><span class="r2">${esc(e.date)}</span></div>`).join('') : '';
+    case 'involvement': return items.length ? `<h3>Involvement</h3>` + items.map(e => `<div class="item"><div class="line"><span class="l">${esc(e.role)}</span><span class="r2">${esc(dates(e))}</span></div><div class="sub"><span>${esc(e.org)}</span><span>${esc(e.location)}</span></div>${ul(e)}</div>`).join('') : '';
+  }
+  return '';
+}
+function renderPreview() {
+  const c = S.contact, st = S.settings;
+  const paper = $('#paper');
+  const body = st.order.filter(s => !st.hidden[s]).map(sectionHTML).join('');
+  const empty = !c.name && !body;
+  paper.innerHTML = empty
+    ? `<div style="height:900px;display:grid;place-items:center;color:#888;font-family:var(--ui);text-align:center;padding:40px">Your resume will appear here as you type.<br>Start with your name under Contact, or load the sample from the Download menu.</div>`
+    : `<div class="r ${st.template}" style="--racc:${st.accent};--rs:${st.size}pt;--sp:${spacing()}">
+        <div class="hdr"><h1 class="name">${esc(c.name)||'&nbsp;'}</h1>${c.title?`<p class="role">${esc(c.title)}</p>`:''}<div class="contact">${contactLine(c)}</div></div>${body}</div>`;
+  $('#pvTemplate').value = st.template; $('#pvSize').value = st.size; $('#pvAccent').value = st.accent;
+  // page-break guides (1056px = 11in at 96dpi)
+  paper.style.minHeight = '0'; const h = paper.scrollHeight; const pages = Math.max(1, Math.ceil((h - 4) / 1056));
+  $$('.pagebreak', paper).forEach(x => x.remove());
+  for (let i = 1; i < pages; i++) { const d = document.createElement('div'); d.className = 'pagebreak'; d.style.top = (i*1056) + 'px'; paper.appendChild(d); }
+  paper.style.minHeight = (pages * 1056) + 'px';
+  $('#pvInfo').textContent = empty ? 'Live preview' : `Live preview · ${pages} page${pages>1?'s':''}${pages>1?' — consider trimming to one':''}`;
+  scalePaper();
+}
+function scalePaper() {
+  const wrap = $('#paperWrap'), paper = $('#paper');
+  const w = wrap.clientWidth; const sc = Math.min(1, w / 816);
+  paper.style.transform = `scale(${sc})`; wrap.style.height = (paper.offsetHeight * sc) + 'px';
+}
+new ResizeObserver(scalePaper).observe($('#paperWrap'));
+$('#pvTemplate').onchange = e => { S.settings.template = e.target.value; commit(); };
+$('#pvSize').onchange = e => { S.settings.size = e.target.value; commit(); };
+$('#pvAccent').oninput = e => { S.settings.accent = e.target.value; save(); renderPreview(); };
+$('#pvAccent').onchange = () => commit();
+
+/* =========================== local health score =========================== */
+const VERBS = /^(led|built|designed|shipped|launched|created|developed|reduced|increased|improved|drove|owned|managed|delivered|implemented|architected|migrated|automated|optimized|grew|cut|saved|negotiated|mentored|coached|founded|established|scaled|streamlined|spearheaded|coordinated|analy[sz]ed|engineered|introduced|partnered|presented|published|redesigned|resolved|secured|standardized|taught|tested|wrote|won|achieved|accelerated|consolidated|generated|integrated|modernized|orchestrated|overhauled|pioneered|produced|reengineered|refactored|restructured|transformed|deployed|maintained|operated|trained|supervised|directed|oversaw|planned|researched|authored|collaborated)\b/i;
+const WEAK = /^(responsible for|helped|worked on|assisted|participated|was|involved in|duties included|tasked with|in charge of)/i;
+function allBullets() {
+  const out = [];
+  ['experience','projects','involvement','education'].forEach(sec => S[sec].forEach(e => (e.bullets||[]).forEach((b,i) => { if (b.trim()) out.push({ sec, e, i, text:b.trim() }); })));
+  return out;
+}
+function healthChecks() {
+  const c = S.contact, bl = allBullets(), checks = [];
+  checks.push({ ok: !!(c.name && c.email && c.phone), t:'Contact details complete', s:'Name, email and phone are all present.' });
+  checks.push({ ok: !!(c.linkedin || c.website || c.github), t:'At least one link', s:'LinkedIn, portfolio or GitHub gives the reader somewhere to go next.' });
+  const wordsSum = S.summary.trim().split(/\s+/).filter(Boolean).length;
+  checks.push({ ok: S.settings.hidden.summary || (wordsSum >= 25 && wordsSum <= 70), t:'Summary is a tight 25–70 words', s: wordsSum ? `${wordsSum} words right now.` : 'No summary yet — or hide the section if you are early-career.' });
+  checks.push({ ok: S.experience.length > 0, t:'Experience listed', s:'At least one role with dates.' });
+  const bPerRole = S.experience.map(e => e.bullets.filter(b=>b.trim()).length);
+  checks.push({ ok: bPerRole.every(n => n >= 2 && n <= 6), t:'2–6 bullets per role', s: bPerRole.length ? `Current counts: ${bPerRole.join(', ')}.` : 'Add roles to check.' });
+  const weakB = bl.filter(b => WEAK.test(b.text) || !VERBS.test(b.text));
+  checks.push({ ok: bl.length > 0 && weakB.length === 0, t:'Every bullet opens with an action verb', s: weakB.length ? `${weakB.length} bullet${weakB.length>1?'s':''} start${weakB.length>1?'':'s'} weakly (e.g. "${weakB[0].text.slice(0,50)}…").` : 'Strong openers throughout.' });
+  const withNum = bl.filter(b => /\d/.test(b.text));
+  checks.push({ ok: bl.length > 0 && withNum.length / bl.length >= 0.5, t:'Half or more bullets are quantified', s: bl.length ? `${withNum.length} of ${bl.length} include a number.` : 'Add bullets to check.' });
+  const long = bl.filter(b => b.text.length > 230);
+  checks.push({ ok: long.length === 0, t:'Bullets fit on two lines', s: long.length ? `${long.length} bullet${long.length>1?'s are':' is'} longer than ~230 characters.` : 'All bullets are concise.' });
+  const pronoun = bl.filter(b => /\b(I|my|me|we|our)\b/.test(b.text));
+  checks.push({ ok: pronoun.length === 0 && !/\b(I|my|me)\b/.test(S.summary), t:'No first-person pronouns', s: pronoun.length ? `${pronoun.length} bullet${pronoun.length>1?'s use':' uses'} "I", "my" or "we".` : 'Written in resume voice.' });
+  checks.push({ ok: S.skills.length > 0 && S.skills.some(s => s.items.split(',').length >= 5), t:'Skills section with 5+ skills', s:'Recruiters and ATS filters scan this section first.' });
+  const dated = [...S.experience, ...S.education].every(e => e.start && (e.end || e.current));
+  checks.push({ ok: dated && (S.experience.length + S.education.length) > 0, t:'Every role and degree has dates', s:'Gaps or missing dates are a common ATS rejection reason.' });
+  const pages = Math.max(1, Math.ceil((parseInt($('#paper').style.minHeight) || 1056) / 1056));
+  checks.push({ ok: pages <= (S.experience.length > 4 ? 2 : 1), t: S.experience.length > 4 ? 'Fits on two pages' : 'Fits on one page', s:`Currently ${pages} page${pages>1?'s':''}.` });
+  return checks;
+}
+function updateScore() {
+  const ch = healthChecks(); const pct = Math.round(100 * ch.filter(c=>c.ok).length / ch.length);
+  $('#scoreNum').textContent = pct; $('#ring').style.setProperty('--pct', pct + '%');
+  $('#ring').style.setProperty('background', `conic-gradient(${pct>=80?'var(--ok)':pct>=50?'var(--accent)':'var(--warn)'} ${pct}%, var(--line) 0)`);
+}
+$('#scoreBtn').onclick = () => {
+  const ch = healthChecks();
+  openModal('Resume health', `<ul class="checks">${ch.map(c=>`<li class="${c.ok?'ok':''}"><span class="ic">${c.ok?'✓':'!'}</span><span class="t">${c.t}<small>${c.s}</small></span></li>`).join('')}</ul>
+    <p style="color:var(--muted);font-size:12.5px;margin:12px 0 0">These checks run locally and mirror what most applicant-tracking filters and first-pass recruiters look for. ${AI.available?'For deeper feedback, use <b>AI tools → Find weak bullets</b>.':''}</p>`,
+    `<button class="btn" data-close>Close</button>`);
+};
+
+/* =========================== versions (snapshots) =========================== */
+const Versions = {
+  KEY:'folio-versions-v1',
+  list() { try { return JSON.parse(localStorage.getItem(this.KEY)) || []; } catch { return []; } },
+  write(v) { try { localStorage.setItem(this.KEY, JSON.stringify(v.slice(0, 20))); } catch { toast('Could not save version (storage full).'); } },
+  snapshot(name) { const v = this.list(); v.unshift({ id:uid(), name: name || `Version ${v.length+1}`, date: new Date().toISOString(), data: JSON.parse(JSON.stringify(S)) }); this.write(v); },
+  modal() {
+    const render = () => {
+      const v = this.list();
+      $('#mBody').innerHTML = `<div style="display:flex;gap:8px;margin-bottom:12px"><input id="vName" class="btn" style="flex:1;text-align:left" placeholder="Name this version (e.g. Master, Acme PM role)"><button class="btn primary" id="vSave">Save current</button></div>
+        ${v.length ? v.map(x=>`<div class="arr"><span class="n">${esc(x.name)}<br><small style="color:var(--muted)">${new Date(x.date).toLocaleString()} · ${esc(x.data.contact?.name||'')}</small></span>
+          <button class="btn sm" data-vload="${x.id}">Load</button><button class="btn sm ghost danger" data-vdel="${x.id}" aria-label="Delete">✕</button></div>`).join('')
+        : `<p style="color:var(--muted)">No saved versions yet. Save one before tailoring for a specific job, then load it back to start from your master again.</p>`}`;
+      $('#vSave').onclick = () => { this.snapshot($('#vName').value.trim()); render(); toast('Version saved'); };
+    };
+    openModal('Versions', '', `<button class="btn" data-close>Done</button>`); render();
+    $('#mBody').onclick = async e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.vload) { const x = this.list().find(y=>y.id===b.dataset.vload); if (x && await ask('Load version', `Replace the current resume with “${esc(x.name)}”? The current content will be saved as a version first.`, 'Load', false)) { this.snapshot('Auto-save before loading'); S = Object.assign(blank(), x.data); S.settings = Object.assign(blank().settings, x.data.settings||{}); weakMarks = {}; commit(true); toast(`Loaded ${x.name}`); } }
+      else if (b.dataset.vdel) { this.write(this.list().filter(y=>y.id!==b.dataset.vdel)); render(); }
+    };
+  },
+};
+
+/* =========================== arrange + confirm =========================== */
+function arrangeModal() {
+  const render = () => {
+    $('#mBody').innerHTML = `<p style="margin:0 0 6px;color:var(--muted)">Order and visibility of sections on the resume. Contact always stays at the top.</p>` +
+      S.settings.order.map((s,i)=>`<div class="arr ${S.settings.hidden[s]?'off':''}"><span class="n">${SECTIONS[s].label} <span style="color:var(--muted);font-size:12px">${sectionCount(s)||''}</span></span>
+        <button class="btn sm icon" data-amv="-1" data-s="${s}" ${i===0?'disabled':''} aria-label="Move up">↑</button>
+        <button class="btn sm icon" data-amv="1" data-s="${s}" ${i===S.settings.order.length-1?'disabled':''} aria-label="Move down">↓</button>
+        <button class="btn sm" data-ahide="${s}">${S.settings.hidden[s]?'Show':'Hide'}</button></div>`).join('');
+  };
+  openModal('Arrange sections', '', `<button class="btn primary" data-close>Done</button>`); render();
+  $('#mBody').onclick = e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.amv) { const o = S.settings.order, i = o.indexOf(b.dataset.s), j = i + +b.dataset.amv; if (j>=0 && j<o.length) { [o[i],o[j]]=[o[j],o[i]]; } }
+    if (b.dataset.ahide) S.settings.hidden[b.dataset.ahide] = !S.settings.hidden[b.dataset.ahide];
+    commit(true); render();
+  };
+}
+function ask(title, msg, okLabel='Confirm', danger=true) {
+  return new Promise(res => {
+    openModal(title, `<p style="margin:0">${msg}</p>`, `<button class="btn" data-close>Cancel</button><button class="btn ${danger?'danger':'primary'}" id="askOk">${okLabel}</button>`);
+    const done = v => { $('#overlay').removeEventListener('click', onClose); res(v); };
+    const onClose = e => { if (e.target === e.currentTarget || e.target.closest('[data-close]')) done(false); };
+    $('#overlay').addEventListener('click', onClose);
+    $('#askOk').onclick = () => { closeModal(); done(true); };
+  });
+}
+
+/* =========================== modal =========================== */
+function openModal(title, body, foot='') { $('#mTitle').textContent = title; $('#mBody').innerHTML = body; $('#mFoot').innerHTML = foot; $('#overlay').classList.add('open'); }
+function closeModal() { $('#overlay').classList.remove('open'); AI.abort(); }
+$('#mClose').onclick = closeModal;
+$('#overlay').addEventListener('click', e => { if (e.target === e.currentTarget || e.target.closest('[data-close]')) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); $('#dlMenu').classList.remove('open'); } });
+</script>
+<script>
+/* =========================== AI (viewer's Claude via sample) =========================== */
+const AI = {
+  fn: null, available: false, ctl: null,
+  abort() { this.ctl?.abort(); this.ctl = null; },
+  copyFor(code) { return ({
+    not_granted:'Claude access was declined for this page, so AI tools are hidden.',
+    sampling_disabled:'Claude is not available on this account.',
+    rate_limited:'Too many requests right now — give it a minute and try again.',
+    session_expired:'Your session expired. Sign in again and retry.',
+    refused:'Claude declined this request. Try rephrasing the content.',
+    invalid_json:'The reply came back in an unexpected shape. Try again.',
+    prompt_too_large:'Too much text for one request. Try a single section.',
+    empty_completion:'Claude returned nothing. Try again with a bit more context.',
+  })[code] || 'Something went wrong on the AI side. Try again in a moment.'; },
+  hideIfFatal(code) { if (['not_granted','sampling_disabled','not_declared','capability_disabled'].includes(code)) { this.available = false; $('#aiMenuBtn').hidden = true; renderEditor(); } },
+  context() {
+    const c = S.contact;
+    const lines = [`Candidate: ${c.name||'(unnamed)'}${c.title?`, targeting: ${c.title}`:''}`];
+    if (S.summary.trim()) lines.push(`Summary: ${S.summary.trim()}`);
+    S.experience.forEach(e => lines.push(`Experience — ${e.role} at ${e.company} (${dates(e)}):\n` + e.bullets.filter(b=>b.trim()).map(b=>`  - ${b}`).join('\n')));
+    S.projects.forEach(e => lines.push(`Project — ${e.name}${e.tech?` [${e.tech}]`:''}:\n` + e.bullets.filter(b=>b.trim()).map(b=>`  - ${b}`).join('\n')));
+    S.involvement.forEach(e => lines.push(`Involvement — ${e.role} at ${e.org}:\n` + e.bullets.filter(b=>b.trim()).map(b=>`  - ${b}`).join('\n')));
+    S.education.forEach(e => lines.push(`Education — ${e.degree} ${e.field}, ${e.school} (${dates(e)})`));
+    if (S.skills.length) lines.push('Skills: ' + S.skills.map(s=>`${s.category?s.category+': ':''}${s.items}`).join('; '));
+    if (S.certifications.length) lines.push('Certifications: ' + S.certifications.map(s=>s.name).join(', '));
+    return lines.join('\n');
+  },
+  RULES: `You are an expert resume writer and recruiter. Write in resume voice: no first-person pronouns, no filler, past tense for past roles and present tense for current ones. Each bullet should open with a strong action verb, state what was done and, wherever the original supplies or clearly implies a measure, the result. Never invent facts, numbers, tools or employers that are not in the source — if a metric is missing you may leave a bracketed placeholder like [X%] at most once per bullet. Keep bullets under 220 characters.`,
+  async call(prompt, { json=false, tier, onText } = {}) {
+    this.abort(); this.ctl = new AbortController();
+    const opts = { signal: this.ctl.signal, modelTier: tier || S.settings.aiTier || 'default' };
+    if (onText) opts.onText = onText;
+    return json ? this.fn.json(prompt, opts) : (await this.fn(prompt, opts)).text;
+  },
+  status(msg) { return `<div class="status"><span class="spin"></span><span>${msg}</span></div>`; },
+  fail(e) {
+    if (e?.code === 'cancelled') return;
+    $('#mBody').innerHTML = `<p style="color:var(--warn)">${this.copyFor(e?.code)}</p>`; $('#mFoot').innerHTML = `<button class="btn" data-close>Close</button>`;
+    this.hideIfFatal(e?.code);
+  },
+  async run(kind, d) {
+    if (!this.available) return;
+    try {
+      if (kind === 'summary' || kind === 'summary-generate') return await this.improveSummary(kind === 'summary-generate');
+      if (kind === 'bullets') return await this.improveBullets(d.sec, d.id);
+      if (kind === 'weak') return await this.weakBullets();
+      if (kind === 'keywords' || kind === 'tailor') return this.tailorForm();
+      if (kind === 'import') return this.importForm();
+    } catch (e) { this.fail(e); }
+  },
+
+  /* --- summary --- */
+  async improveSummary(generate) {
+    const cur = S.summary.trim();
+    if (!generate && !cur) { toast('Write a draft first, or use "Write from my experience".'); return; }
+    openModal(generate ? 'Write a summary' : 'Improve summary', this.status('Thinking…'), `<button class="btn" data-close>Cancel</button>`);
+    const prompt = `${this.RULES}\n\nHere is the candidate's resume content:\n${this.context()}\n\n${generate
+      ? 'Write a professional summary of 2–3 sentences (35–60 words) for the top of this resume. Lead with the candidate\'s role and years of experience if inferable, then their strongest concrete achievements and the value they bring. Reply with only the summary text.'
+      : `Rewrite this professional summary to be sharper, more specific and more compelling, 35–60 words, keeping every fact true to the source:\n"""${cur}"""\n\nReply with only the rewritten summary text.`}`;
+    let text = '';
+    const render = () => { $('#mBody').innerHTML = `<div class="diff">${cur?`<div><label>Current</label><div class="box">${esc(cur)}</div></div>`:''}<div><label>Suggested</label><div class="box new" id="aiOut">${esc(text)||'…'}</div></div></div>`; };
+    text = (await this.call(prompt, { onText: ({text:t}) => { text = t; const o = $('#aiOut'); if (o) o.textContent = t; else render(); } })).trim().replace(/^"|"$/g,'');
+    render();
+    $('#mFoot').innerHTML = `<button class="btn" data-close>Discard</button><button class="btn primary" id="applySum">Use this summary</button>`;
+    $('#applySum').onclick = () => { S.summary = text; commit(true); closeModal(); toast('Summary updated'); };
+  },
+
+  /* --- bullets for one entry --- */
+  async improveBullets(sec, id) {
+    const e = S[sec].find(x => x.id === id);
+    const bl = e.bullets.map((b,i)=>({b:b.trim(),i})).filter(x=>x.b);
+    if (!bl.length) { toast('Add a bullet or two first.'); return; }
+    const head = sec==='experience' ? `${e.role} at ${e.company}` : sec==='projects' ? `project ${e.name}` : sec==='involvement' ? `${e.role} at ${e.org}` : `${e.school}`;
+    openModal('Improve bullets', this.status('Rewriting bullets…'), `<button class="btn" data-close>Cancel</button>`);
+    const prompt = `${this.RULES}\n\nContext for the whole resume:\n${this.context()}\n\nRewrite each of these bullets for the entry "${head}". Keep the same order and the same number of items. Make each one stronger: sharper verb, clearer scope, concrete outcome. If a bullet is already excellent, return it unchanged.\n\n${bl.map((x,k)=>`${k+1}. ${x.b}`).join('\n')}\n\nReply with only a JSON array of strings, one per bullet, in order. Example: ["Led …", "Cut …"]`;
+    const out = await this.call(prompt, { json:true });
+    if (!Array.isArray(out)) throw { code:'invalid_json' };
+    this.reviewList('Improve bullets', bl.map((x,k)=>({ sec, id, i:x.i, ctx: head, old:x.b, neu: String(out[k] ?? x.b) })));
+  },
+
+  /* --- weak bullets across the resume --- */
+  async weakBullets() {
+    const bl = allBullets();
+    if (!bl.length) { toast('No bullets to review yet.'); return; }
+    openModal('Find weak bullets', this.status('Reading every bullet…'), `<button class="btn" data-close>Cancel</button>`);
+    const numbered = bl.map((x,k)=>`${k+1}. [${x.sec} — ${x.e.role||x.e.name||x.e.school||''}] ${x.text}`).join('\n');
+    const prompt = `${this.RULES}\n\nReview these resume bullets. Identify the weak ones: vague ("worked on", "helped with", "responsible for"), missing an outcome or metric, passive, duplicated, too long, or buried leading with a tool instead of a result. Skip bullets that are already strong.\n\n${numbered}\n\nReply with only a JSON array of objects {"n": <bullet number>, "issue": "<one short sentence naming the problem>", "rewrite": "<improved bullet>"}, weakest first, at most 10 items. Return [] if all are strong.`;
+    const out = await this.call(prompt, { json:true });
+    if (!Array.isArray(out)) throw { code:'invalid_json' };
+    weakMarks = {};
+    const items = out.filter(o => bl[o.n-1]).map(o => { const x = bl[o.n-1]; weakMarks[`${x.sec}:${x.e.id}:${x.i}`] = o.issue; return { sec:x.sec, id:x.e.id, i:x.i, ctx:`${SECTIONS[x.sec].label}: ${x.e.role||x.e.name||x.e.school||''}`, old:x.text, neu:String(o.rewrite||''), why:o.issue }; });
+    renderEditor();
+    if (!items.length) { $('#mBody').innerHTML = `<p>Every bullet reads as strong — nice work. The local health check (score in the top bar) covers structure and completeness.</p>`; $('#mFoot').innerHTML = `<button class="btn" data-close>Close</button>`; return; }
+    this.reviewList('Weak bullets', items, `${items.length} bullet${items.length>1?'s':''} could be stronger. Weak ones are outlined in orange in the editor until you edit them.`);
+  },
+
+  /* --- keywords from a job description --- */
+  keywordsForm() {
+    openModal('Match a job posting', `<p style="margin:0 0 8px;color:var(--muted)">Paste the job description. Claude will pull the skills and keywords it expects, show which ones you already have, and suggest bullet tweaks to work the missing ones in — without inventing experience.</p>
+      <div class="f"><textarea id="jd" style="min-height:180px" placeholder="Paste the job description here…"></textarea></div>`,
+      `<button class="btn" data-close>Cancel</button><button class="btn ai" id="kwGo">✦ Analyze</button>`);
+    $('#kwGo').onclick = () => this.keywords($('#jd').value.trim());
+    $('#jd').focus();
+  },
+  async keywords(jd) {
+    if (jd.length < 80) { toast('Paste a fuller job description (a few paragraphs).'); return; }
+    $('#mBody').innerHTML = this.status('Comparing the posting against your resume…'); $('#mFoot').innerHTML = `<button class="btn" data-close>Cancel</button>`;
+    const prompt = `${this.RULES}\n\nJOB DESCRIPTION:\n"""${jd.slice(0, 12000)}"""\n\nCANDIDATE RESUME:\n${this.context()}\n\nTasks:\n1. Extract the 12–20 most important hard skills, tools, and domain keywords the posting expects (the exact phrasing an ATS would match on).\n2. Mark each as "present" if the resume already contains it or a clear synonym, otherwise "missing".\n3. For missing keywords the candidate plausibly HAS (based on adjacent skills or duties), suggest up to 5 rewrites of EXISTING bullets that honestly work the keyword in. Quote the exact original bullet text. Never fabricate experience; if the keyword is clearly outside the candidate's background, do not suggest it.\n4. Suggest a short list of missing keywords that are reasonable to add to the Skills section as-is.\n\nReply with only JSON: {"keywords":[{"k":"…","status":"present|missing"}], "rewrites":[{"original":"<exact bullet>","rewrite":"…","keyword":"…"}], "addToSkills":["…"], "title":"<the job title from the posting>"}`;
+    let out;
+    try { out = await this.call(prompt, { json:true }); } catch (e) { this.fail(e); return; }
+    const kws = Array.isArray(out?.keywords) ? out.keywords : [];
+    const bl = allBullets();
+    const rewrites = (out?.rewrites||[]).map(r => { const m = bl.find(x => x.text === r.original) || bl.find(x => x.text.includes((r.original||'').slice(0,40))); return m ? { sec:m.sec, id:m.e.id, i:m.i, ctx:`Adds “${r.keyword}” · ${m.e.role||m.e.name||''}`, old:m.text, neu:String(r.rewrite||'') } : null; }).filter(Boolean);
+    const add = (out?.addToSkills||[]).filter(k => !S.skills.some(s => s.items.toLowerCase().includes(String(k).toLowerCase())));
+    const present = kws.filter(k=>k.status==='present').length;
+    $('#mTitle').textContent = `Match: ${out?.title || 'job posting'}`;
+    $('#mBody').innerHTML = `<p style="margin:0 0 10px"><b>${present} of ${kws.length}</b> keywords already appear on your resume.</p>
+      <div class="chips" style="margin-bottom:16px">${kws.map(k=>`<span class="chip ${k.status==='present'?'present':''}">${k.status==='present'?'✓ ':''}${esc(k.k)}</span>`).join('')}</div>
+      ${add.length ? `<h4 style="margin:0 0 6px;font-weight:600">Add to Skills</h4><p style="margin:0 0 6px;color:var(--muted);font-size:12.5px">Tap to select the ones you genuinely have.</p><div class="chips" id="addKw" style="margin-bottom:16px">${add.map(k=>`<button class="chip on" data-k="${esc(k)}">${esc(k)}</button>`).join('')}</div>` : ''}
+      ${rewrites.length ? `<h4 style="margin:0 0 6px;font-weight:600">Bullet rewrites</h4>` + this.suggHTML(rewrites) : `<p style="color:var(--muted)">No safe bullet rewrites — the missing keywords are outside what your bullets describe.</p>`}`;
+    $('#addKw')?.addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (b) b.classList.toggle('on'); });
+    $('#mFoot').innerHTML = `<button class="btn" data-close>Close</button><button class="btn primary" id="kwApply">Apply selected</button>`;
+    $('#kwApply').onclick = () => {
+      const picks = $$('#addKw .chip.on').map(b => b.dataset.k);
+      if (picks.length) { let tgt = S.skills.find(s => /other|tools|keywords|additional/i.test(s.category)) ; if (!tgt) { tgt = newEntry.skills(); tgt.category = 'Additional'; S.skills.push(tgt); } tgt.items = [tgt.items, ...picks].filter(Boolean).join(', '); }
+      const n = this.applySugg(rewrites);
+      commit(true); closeModal(); toast(`Added ${picks.length} skill${picks.length===1?'':'s'}, updated ${n} bullet${n===1?'':'s'}`);
+    };
+  },
+
+  /* --- tailor to a job posting --- */
+  tailorForm() {
+    openModal('Tailor to a job posting', `<p style="margin:0 0 8px;color:var(--muted)">Paste the full job description. Claude compares it against your resume and proposes changes; you approve each one. Your current version is saved automatically before anything is applied.</p>
+      <div class="f"><textarea id="jd" style="min-height:200px" placeholder="Paste the job description here…">${esc(S.lastJD||'')}</textarea></div>
+      <div class="f" style="margin-top:10px"><label for="jdNotes">Anything to emphasize or avoid? (optional)</label><input id="jdNotes" placeholder="e.g. lean on the healthcare work; I don't want to lead with management"></div>`,
+      `<button class="btn" data-close>Cancel</button><button class="btn ai" id="tGo">✦ Analyze</button>`);
+    $('#tGo').onclick = () => this.tailor($('#jd').value.trim(), $('#jdNotes').value.trim());
+    $('#jd').focus();
+  },
+  async tailor(jd, notes) {
+    if (jd.length < 80) { toast('Paste a fuller job description (a few paragraphs).'); return; }
+    S.lastJD = jd; save();
+    $('#mBody').innerHTML = this.status('Reading the posting and comparing it with your resume…'); $('#mFoot').innerHTML = `<button class="btn" data-close>Cancel</button>`;
+    const sections = S.settings.order.map(s => `${s} (${vis(s).length || (s==='summary' ? (S.summary?1:0) : 0)} items)`).join(', ');
+    const entries = ['experience','projects','involvement'].flatMap(sec => S[sec].map(e => `${sec}:${e.id} = ${e.role||e.name||''}${e.company||e.org?` @ ${e.company||e.org}`:''}${e.off?' [currently hidden]':''}`)).join('\n');
+    const prompt = `${this.RULES}\n\nYou are tailoring a candidate's resume to one specific job posting. Be honest: the goal is to present real experience in the language and priority order this employer uses, never to claim things the candidate has not done.\n\nJOB DESCRIPTION:\n"""${jd.slice(0, 14000)}"""\n${notes?`\nCANDIDATE'S NOTES: ${notes}\n`:''}\nCANDIDATE RESUME:\n${this.context()}\n\nCurrent section order: ${sections}\nEntry ids you may reference:\n${entries}\n\nProduce:\n1. title/company from the posting.\n2. fitScore 0–100: how well the resume as written matches, and a two-sentence fitSummary (strengths first, then the main gap).\n3. requirements: the 6–12 most important requirements from the posting, each with status "met", "partial" or "missing" and one line of evidence from the resume (or what is absent).\n4. headline: a target-role headline for the top of the resume matching the posting's title wording (only if it is truthful).\n5. summary: a rewritten 35–60 word professional summary aimed at this role, built only from facts in the resume.\n6. keywords: 12–20 ATS keywords/skills the posting expects, each "present" or "missing".\n7. addToSkills: missing keywords the candidate plausibly has given adjacent skills (be conservative).\n8. rewrites: up to 8 rewrites of EXISTING bullets that make relevance to this posting explicit or work a keyword in honestly. Quote the exact original text. Prefer bullets in the most relevant roles.\n9. emphasis: for entries listed above, actions {"id":"<sec:id>","action":"move_up"|"hide"|"show","why":"…"} — move the most relevant roles/projects up within their section, hide clearly irrelevant projects or involvement if the resume is long, un-hide hidden ones that are relevant. Keep it to at most 5 actions; empty array if the current order is fine.\n10. sectionOrder: the best order of these section keys for this posting: ${S.settings.order.join(', ')} (all of them, reordered), plus one sentence "orderWhy".\n\nReply with only JSON: {"title":"","company":"","fitScore":0,"fitSummary":"","requirements":[{"req":"","status":"met","evidence":""}],"headline":"","summary":"","keywords":[{"k":"","status":"present"}],"addToSkills":[""],"rewrites":[{"original":"","rewrite":"","why":""}],"emphasis":[{"id":"","action":"move_up","why":""}],"sectionOrder":[""],"orderWhy":""}`;
+    let out;
+    try { out = await this.call(prompt, { json:true, tier: S.settings.aiTier === 'quick' ? 'default' : S.settings.aiTier }); } catch (e) { this.fail(e); return; }
+    if (!out || typeof out !== 'object') { this.fail({ code:'invalid_json' }); return; }
+    const bl = allBullets();
+    const rewrites = (out.rewrites||[]).map(r => { const m = bl.find(x => x.text === r.original) || bl.find(x => x.text.includes(String(r.original||'').slice(0,40))); return m ? { sec:m.sec, id:m.e.id, i:m.i, ctx:`${m.e.role||m.e.name||''}`, old:m.text, neu:String(r.rewrite||''), why:r.why } : null; }).filter(Boolean);
+    const kws = Array.isArray(out.keywords) ? out.keywords : [];
+    const present = kws.filter(k=>k.status==='present').length;
+    const add = (out.addToSkills||[]).map(String).filter(k => k && !S.skills.some(s => s.items.toLowerCase().includes(k.toLowerCase())));
+    const emph = (out.emphasis||[]).map(a => { const [sec,id] = String(a.id||'').split(':'); const e = S[sec]?.find(x=>x.id===id); return e ? { sec, id, e, action:a.action, why:a.why, label:`${a.action==='move_up'?'Move up':a.action==='hide'?'Hide':'Show'}: ${e.role||e.name||''}${e.company||e.org?` @ ${e.company||e.org}`:''}` } : null; }).filter(Boolean);
+    const newOrder = Array.isArray(out.sectionOrder) && out.sectionOrder.length === S.settings.order.length && out.sectionOrder.every(s => S.settings.order.includes(s)) ? out.sectionOrder : null;
+    const orderChanged = newOrder && newOrder.join() !== S.settings.order.join();
+    const score = Math.max(0, Math.min(100, +out.fitScore || 0));
+    const col = score>=75?'var(--ok)':score>=50?'var(--accent)':'var(--warn)';
+    const opt = (id, title, body, why, checked=true) => `<label class="opt"><input type="checkbox" data-opt="${id}" ${checked?'checked':''}><div class="body"><div>${title}</div>${body||''}${why?`<div class="why">${esc(why)}</div>`:''}</div></label>`;
+    $('#mTitle').textContent = `Tailor: ${esc(out.title||'this role')}${out.company?` · ${esc(out.company)}`:''}`;
+    $('#mBody').innerHTML = `
+      <div class="fit"><div class="big" style="background:conic-gradient(${col} ${score}%, var(--line) 0)"><span>${score}</span></div><div><p><b>Fit as written</b></p><p><small>${esc(out.fitSummary||'')}</small></p></div></div>
+      <div class="tsec">Requirements <small>${(out.requirements||[]).filter(r=>r.status==='met').length} met · ${(out.requirements||[]).filter(r=>r.status==='partial').length} partial · ${(out.requirements||[]).filter(r=>r.status==='missing').length} missing</small></div>
+      ${(out.requirements||[]).map(r=>`<div class="req ${esc(r.status)}"><span class="st">${esc(r.status)}</span><span>${esc(r.req)}<small>${esc(r.evidence||'')}</small></span></div>`).join('')}
+      <div class="tsec">Keywords <small>${present} of ${kws.length} already present</small></div>
+      <div class="chips">${kws.map(k=>`<span class="chip ${k.status==='present'?'present':''}">${k.status==='present'?'✓ ':''}${esc(k.k)}</span>`).join('')}</div>
+      <div class="tsec">Proposed changes <small>tick what to apply</small></div>
+      ${out.headline && out.headline !== S.contact.title ? opt('headline', `<b>Headline:</b> ${esc(out.headline)}`, S.contact.title?`<div class="why">Currently: ${esc(S.contact.title)}</div>`:'', '') : ''}
+      ${out.summary ? opt('summary', `<b>Tailored summary</b>`, `<textarea id="tSummary">${esc(out.summary)}</textarea>`, '') : ''}
+      ${add.length ? opt('skills', `<b>Add to Skills:</b> ${add.map(esc).join(', ')}`, '', 'Only tick this if you genuinely have these; you can edit the Skills section afterwards.') : ''}
+      ${orderChanged ? opt('order', `<b>Section order:</b> ${newOrder.map(s=>SECTIONS[s].label).join(' → ')}`, '', out.orderWhy) : ''}
+      ${emph.map((a,k)=>opt(`emph${k}`, `<b>${esc(a.label)}</b>`, '', a.why)).join('')}
+      ${rewrites.length ? `<div class="tsec">Bullet rewrites <small>${rewrites.length}</small></div>` + this.suggHTML(rewrites) : ''}`;
+    $$('.sugg textarea, #tSummary').forEach(autoGrow);
+    $('#mFoot').innerHTML = `<button class="btn" data-close>Close</button><button class="btn primary" id="tApply">Apply selected</button>`;
+    $('#tApply').onclick = () => {
+      const on = id => $(`[data-opt="${id}"]`)?.checked;
+      Versions.snapshot(`Before tailoring for ${out.title||'job'}`);
+      let n = 0;
+      if (on('headline')) { S.contact.title = out.headline; n++; }
+      if (on('summary')) { S.summary = $('#tSummary').value.trim(); n++; }
+      if (on('skills') && add.length) { let tgt = S.skills.find(s => /other|tools|keywords|additional/i.test(s.category)); if (!tgt) { tgt = newEntry.skills(); tgt.category = 'Additional'; S.skills.push(tgt); } tgt.items = [tgt.items, ...add].filter(Boolean).join(', '); n++; }
+      if (on('order') && newOrder) { S.settings.order = newOrder; n++; }
+      emph.forEach((a,k) => { if (!on(`emph${k}`)) return; const arr = S[a.sec]; const i = arr.indexOf(a.e); if (a.action==='hide') a.e.off = true; else if (a.action==='show') a.e.off = false; else if (a.action==='move_up' && i > 0) { arr.splice(i,1); arr.splice(0,0,a.e); } n++; });
+      n += this.applySugg(rewrites);
+      commit(true); closeModal(); toast(`Applied ${n} change${n===1?'':'s'} — the previous version is saved under Download → Versions.`);
+    };
+  },
+
+  /* --- import from pasted resume text --- */
+  importForm() {
+    openModal('Import a resume', `<p style="margin:0 0 8px;color:var(--muted)">Paste the full text of an existing resume. Claude will sort it into Folio's sections; you'll see what it found before anything changes.</p>
+      <div class="f"><textarea id="impText" style="min-height:220px" placeholder="Select all → copy in your PDF or old builder, then paste here…"></textarea></div>`,
+      `<button class="btn" data-close>Cancel</button><button class="btn ai" id="impGo">✦ Read it</button>`);
+    $('#impGo').onclick = () => this.importText($('#impText').value.trim());
+    $('#impText').focus();
+  },
+  async importText(text) {
+    if (text.length < 100) { toast('That looks too short to be a resume.'); return; }
+    $('#mBody').innerHTML = this.status('Reading and sorting the resume…'); $('#mFoot').innerHTML = `<button class="btn" data-close>Cancel</button>`;
+    const prompt = `You are converting the plain text of a resume into structured JSON. Copy the wording exactly as written — do not improve, shorten or invent anything. Split text that ran together on copy where the structure is obvious. Dates stay as written (e.g. "Jun 2022", "2019 – Present"); if a role is described as current, set "current": true and leave "end" empty. Skills: group them by the categories the resume uses; if it has none, put them all under one entry with an empty category. Bullets are separate strings. Leave fields you cannot find as empty strings or empty arrays.
+
+RESUME TEXT:
+"""${text.slice(0, 20000)}"""
+
+Reply with only JSON in exactly this shape:
+{"contact":{"name":"","title":"","email":"","phone":"","location":"","website":"","linkedin":"","github":""},
+ "summary":"",
+ "experience":[{"role":"","company":"","location":"","start":"","end":"","current":false,"bullets":[""]}],
+ "education":[{"school":"","degree":"","field":"","location":"","start":"","end":"","gpa":"","bullets":[""]}],
+ "projects":[{"name":"","link":"","tech":"","start":"","end":"","bullets":[""]}],
+ "skills":[{"category":"","items":"comma, separated"}],
+ "certifications":[{"name":"","issuer":"","date":"","link":""}],
+ "involvement":[{"role":"","org":"","location":"","start":"","end":"","bullets":[""]}]}`;
+    let out;
+    try { out = await this.call(prompt, { json:true }); } catch (e) { this.fail(e); return; }
+    if (!out || typeof out !== 'object' || !out.contact) { this.fail({ code:'invalid_json' }); return; }
+    const arr = k => Array.isArray(out[k]) ? out[k] : [];
+    const clean = (sec, e) => { const n = Object.assign(newEntry[sec](), e); n.id = uid(); if (Array.isArray(n.bullets)) n.bullets = n.bullets.map(b=>String(b||'').trim()).filter(Boolean); else if ('bullets' in newEntry[sec]()) n.bullets = []; Object.keys(n).forEach(k => { if (typeof n[k] === 'string') n[k] = n[k].trim(); }); return n; };
+    const parsed = {
+      contact: Object.assign(blank().contact, Object.fromEntries(Object.entries(out.contact||{}).map(([k,v])=>[k,String(v||'').trim()]))),
+      summary: String(out.summary||'').trim(),
+      experience: arr('experience').map(e=>clean('experience',e)), education: arr('education').map(e=>clean('education',e)),
+      projects: arr('projects').map(e=>clean('projects',e)), skills: arr('skills').filter(s=>s.items).map(e=>clean('skills',e)),
+      certifications: arr('certifications').filter(c=>c.name).map(e=>clean('certifications',e)), involvement: arr('involvement').map(e=>clean('involvement',e)),
+    };
+    const rows = [['Name', parsed.contact.name || '—'], ['Summary', parsed.summary ? `${parsed.summary.split(/\s+/).length} words` : 'none'],
+      ...['experience','education','projects','skills','certifications','involvement'].map(k => [SECTIONS[k].label, `${parsed[k].length} ${parsed[k].length===1?'entry':'entries'}${parsed[k][0]?.bullets ? `, ${parsed[k].reduce((n,e)=>n+(e.bullets?.length||0),0)} bullets` : ''}`])];
+    const hasContent = !!(S.contact.name || S.experience.length || S.summary);
+    $('#mBody').innerHTML = `<p style="margin:0 0 10px">Here's what Claude found. Anything it missed you can add by hand afterwards.</p>
+      <ul class="checks">${rows.map(([a,b])=>`<li class="ok"><span class="ic">✓</span><span class="t">${a}<small>${esc(b)}</small></span></li>`).join('')}</ul>
+      ${hasContent ? `<p style="color:var(--warn);font-size:12.5px;margin:12px 0 0">You already have content in Folio. "Replace" overwrites it (your style settings stay); "Merge" adds the imported entries after your existing ones.</p>` : ''}`;
+    $('#mFoot').innerHTML = `<button class="btn" data-close>Cancel</button>${hasContent?`<button class="btn" id="impMerge">Merge</button>`:''}<button class="btn primary" id="impReplace">${hasContent?'Replace':'Import'}</button>`;
+    const apply = merge => {
+      if (!merge) { S.contact = parsed.contact; S.summary = parsed.summary; ['experience','education','projects','skills','certifications','involvement'].forEach(k => S[k] = parsed[k]); }
+      else { Object.entries(parsed.contact).forEach(([k,v]) => { if (v && !S.contact[k]) S.contact[k] = v; }); if (!S.summary && parsed.summary) S.summary = parsed.summary; ['experience','education','projects','skills','certifications','involvement'].forEach(k => S[k].push(...parsed[k])); }
+      weakMarks = {}; active = 'experience'; commit(true); closeModal(); toast('Resume imported — check each section for anything that landed in the wrong place.');
+    };
+    $('#impReplace').onclick = () => apply(false);
+    $('#impMerge')?.addEventListener('click', () => apply(true));
+  },
+
+  /* --- shared review UI --- */
+  suggHTML(items) {
+    return items.map((s,k)=>`<div class="sugg"><input type="checkbox" checked data-k="${k}"><div class="ctx">${esc(s.ctx)}</div><div class="old">${esc(s.old)}</div>${s.why?`<div class="why">${esc(s.why)}</div>`:''}<div class="new"><textarea data-k="${k}">${esc(s.neu)}</textarea></div></div>`).join('');
+  },
+  applySugg(items) {
+    let n = 0;
+    $$('.sugg').forEach(el => { const k = +$('input',el).dataset.k; if (!$('input',el).checked) return; const s = items[k]; const val = $('textarea',el).value.trim(); if (!val || val === s.old) return; const e = S[s.sec].find(x=>x.id===s.id); if (e) { e.bullets[s.i] = val; delete weakMarks[`${s.sec}:${s.id}:${s.i}`]; n++; } });
+    return n;
+  },
+  reviewList(title, items, note) {
+    $('#mTitle').textContent = title;
+    $('#mBody').innerHTML = `${note?`<p style="margin:0 0 12px;color:var(--muted)">${note}</p>`:''}<p style="margin:0 0 10px;font-size:12.5px;color:var(--muted)">Untick anything you don't want; you can edit the suggestions before applying.</p>${this.suggHTML(items)}`;
+    $('#mFoot').innerHTML = `<button class="btn" data-close>Discard</button><button class="btn primary" id="applyAll">Apply selected</button>`;
+    $$('.sugg textarea').forEach(autoGrow);
+    $('#applyAll').onclick = () => { const n = this.applySugg(items); commit(true); closeModal(); toast(`Updated ${n} bullet${n===1?'':'s'}`); };
+  },
+};
+
+$('#aiMenuBtn').onclick = () => {
+  openModal('AI tools', `<div style="display:grid;gap:8px">
+    <button class="btn" style="justify-content:flex-start;padding:12px" data-aik="weak"><span>✦</span><span><b style="font-weight:500">Find weak bullets</b><br><small style="color:var(--muted)">Scan every bullet, flag the vague ones, and propose rewrites.</small></span></button>
+    <button class="btn" style="justify-content:flex-start;padding:12px" data-aik="tailor"><span>✦</span><span><b style="font-weight:500">Tailor to a job posting</b><br><small style="color:var(--muted)">Paste a description: fit score, requirement gaps, a tailored headline and summary, keyword-aware bullet rewrites, and what to emphasize or hide.</small></span></button>
+    <button class="btn" style="justify-content:flex-start;padding:12px" data-aik="import"><span>✦</span><span><b style="font-weight:500">Import from pasted text</b><br><small style="color:var(--muted)">Paste an existing resume (from a PDF, Word file or another builder) and map it into sections.</small></span></button>
+    <button class="btn" style="justify-content:flex-start;padding:12px" data-aik="summary"><span>✦</span><span><b style="font-weight:500">Improve summary</b><br><small style="color:var(--muted)">Tighten the opening paragraph.</small></span></button>
+  </div>
+  <div class="f" style="margin-top:16px"><label for="aiTier">Model</label><select id="aiTier" class="btn" style="width:100%;justify-content:space-between">
+    <option value="quick">Quick — fastest, good for short rewrites</option>
+    <option value="default">Balanced — the everyday model (default)</option>
+    <option value="complex">Most capable — thinks longest; best for job matching and imports</option></select>
+    <div class="hint">Applies to every AI tool here. If your plan doesn't include a tier, Claude uses the nearest one it does.</div></div>
+  <p style="color:var(--muted);font-size:12px;margin:14px 0 0">Each tool asks Claude once and uses your own Claude usage. Nothing is applied until you approve it.</p>`, `<button class="btn" data-close>Close</button>`);
+  $('#aiTier').value = S.settings.aiTier || 'default';
+  $('#aiTier').onchange = e => { S.settings.aiTier = e.target.value; save(); toast('Model updated'); };
+  $('#mBody').onclick = e => { const b = e.target.closest('[data-aik]'); if (b) AI.run(b.dataset.aik, {}); };
+};
+
+/* =========================== exports =========================== */
+let DL = null;
+async function deliver(filename, data) {
+  if (DL) { try { await DL.save({ filename, data }); toast(`Saved ${filename}`); return; } catch (e) { if (e?.code === 'declined') return; if (!['unavailable','not_granted','capability_disabled'].includes(e?.code)) { toast('Could not save the file. Try Print instead.'); return; } } }
+  // fallback: plain anchor download (works when opened outside the viewer)
+  try { const blob = data instanceof Blob ? data : new Blob([data]); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 4000); } catch (e) { toast('Downloads are not available here — use Print › Save as PDF.'); }
+}
+const fileBase = () => (S.contact.name || 'resume').replace(/[^\w\- ]+/g,'').trim().replace(/\s+/g,'_') + '_Resume';
+
+/* --- PDF via pdfmake (real text, selectable, ATS-parseable) --- */
+function pdfDef() {
+  const st = S.settings, c = S.contact, acc = st.accent;
+  const modern = st.template === 'modern';
+  const font = modern ? 'Carlito' : 'Spectral';
+  const fs = parseFloat(st.size) * (modern ? 1.06 : 1);
+  const sp = spacing();
+  const grey = '#333333';
+  const content = [];
+  const contactParts = [c.email, c.phone, c.location, c.website, c.linkedin, c.github].filter(Boolean).map(s => s.replace(/^https?:\/\//,''));
+  const contactText = contactParts.flatMap((p,i) => i ? [{ text:'  |  ', color:'#999999' }, p] : [p]);
+  // header
+  if (modern) {
+    content.push({ table:{ widths:[4,'*'], body:[[ { text:'', fillColor:acc }, { stack:[ { text:c.name||' ', fontSize:fs*2.3, bold:true, color:acc, lineHeight:1 }, c.title?{ text:c.title, color:grey, margin:[0,2,0,0] }:null, { text:contactText, color:grey, fontSize:fs*.95, margin:[0,4,0,0] } ].filter(Boolean), margin:[8,0,0,0] } ]] }, layout:'noBorders', margin:[0,0,0,4] });
+  } else {
+    content.push({ text:c.name||' ', fontSize:fs*2.15, bold:true, alignment:'center' });
+    if (c.title) content.push({ text:c.title, alignment:'center', color:grey, margin:[0,1,0,0] });
+    content.push({ text:contactText, alignment:'center', color:grey, fontSize:fs*.95, margin:[0,4,0,6] });
+    content.push({ canvas:[{ type:'line', x1:0, y1:0, x2:524, y2:0, lineWidth:1.2, lineColor:acc }], margin:[0,0,0,2] });
+  }
+  const H = t => modern
+    ? { stack:[ { text:t.toUpperCase(), bold:true, color:acc, fontSize:fs*.95, characterSpacing:1, margin:[0,10*sp,0,1] }, { canvas:[{ type:'line', x1:0, y1:0, x2:22, y2:0, lineWidth:1.6, lineColor:acc }], margin:[0,0,0,5*sp] } ] }
+    : { stack:[ { text:t.toUpperCase(), bold:true, color:acc, fontSize:fs*1.02, characterSpacing:.8, margin:[0,9*sp,0,1] }, { canvas:[{ type:'line', x1:0, y1:0, x2:524, y2:0, lineWidth:.6, lineColor:'#999999' }], margin:[0,0,0,4*sp] } ] };
+  const line = (l, r) => ({ columns:[ { text:l, bold:true }, { text:r, alignment:'right', width:'auto', color:grey } ], columnGap:8 });
+  const sub = (l, r) => ({ columns:[ { text:l, italics:true, color:grey }, { text:r, alignment:'right', width:'auto', italics:true, color:grey } ], columnGap:8 });
+  const ul = e => hasBullets(e) ? { ul: e.bullets.filter(b=>b.trim()), margin:[2,1,0,0] } : null;
+  const item = arr => ({ stack: arr.filter(Boolean), margin:[0,0,0,6*sp] });
+  for (const sec of st.order) {
+    if (st.hidden[sec]) continue;
+    if (sec === 'summary') { if (S.summary.trim()) { content.push(H('Summary'), { text:S.summary.trim() }); } continue; }
+    const items = vis(sec); if (!items.length) continue;
+    content.push(H(SECTIONS[sec].label));
+    items.forEach(e => {
+      if (sec === 'experience') content.push(item([ line(e.role, dates(e)), sub(e.company, e.location), ul(e) ]));
+      else if (sec === 'education') content.push(item([ line(e.school, dates(e)), sub([[e.degree,e.field].filter(Boolean).join(' in '), e.gpa?`GPA ${e.gpa}`:''].filter(Boolean).join(', '), e.location), ul(e) ]));
+      else if (sec === 'projects') content.push(item([ { columns:[ { text:[ { text:e.name, bold:true }, e.tech?{ text:`  |  ${e.tech}`, color:grey }:'' ] }, { text:dates(e), alignment:'right', width:'auto', color:grey } ], columnGap:8 }, e.link?{ text:e.link.replace(/^https?:\/\//,''), italics:true, color:grey }:null, ul(e) ]));
+      else if (sec === 'skills') content.push({ text:[ e.category?{ text:`${e.category}: `, bold:true }:'', e.items ], margin:[0,0,0,1] });
+      else if (sec === 'certifications') content.push({ columns:[ { text:[ { text:e.name, bold:true }, e.issuer?`, ${e.issuer}`:'' ] }, { text:e.date, alignment:'right', width:'auto', color:grey } ], columnGap:8, margin:[0,0,0,2] });
+      else if (sec === 'involvement') content.push(item([ line(e.role, dates(e)), sub(e.org, e.location), ul(e) ]));
+    });
+  }
+  return { pageSize:'LETTER', pageMargins:[44,40,44,40], content, defaultStyle:{ font, fontSize:fs, lineHeight: (sp < 1 ? 1.14 : 1.22) / (modern ? 1.2207 : 1.522), color:'#1b1b1b' }, info:{ title:`${c.name} — Resume`, author:c.name } };
+}
+/* PDF fonts live in ./fonts and are fetched on first export, then kept in memory. */
+const FONT_FILES = ['Spectral-Regular','Spectral-Bold','Spectral-Italic','Spectral-BoldItalic','Carlito-Regular','Carlito-Bold','Carlito-Italic','Carlito-BoldItalic'];
+let FONT_VFS = null;
+async function loadFonts(family) {
+  FONT_VFS = FONT_VFS || {};
+  const need = FONT_FILES.filter(f => f.startsWith(family) && !FONT_VFS[f + '.ttf']);
+  await Promise.all(need.map(async f => {
+    const r = await fetch(`fonts/${f}.ttf`); if (!r.ok) throw new Error(`fonts/${f}.ttf ${r.status}`);
+    const bytes = new Uint8Array(await r.arrayBuffer()); let s = ''; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    FONT_VFS[f + '.ttf'] = btoa(s);
+  }));
+}
+async function exportPDF() {
+  if (!window.pdfMake) { toast('PDF library did not load. Use Print › Save as PDF.'); return; }
+  toast('Building PDF…');
+  try { await loadFonts(S.settings.template === 'modern' ? 'Carlito' : 'Spectral'); } catch (e) { console.error(e); toast('Could not load the PDF fonts (fonts/ folder missing?). Use Print › Save as PDF.'); return; }
+  const fonts = { Spectral:{ normal:'Spectral-Regular.ttf', bold:'Spectral-Bold.ttf', italics:'Spectral-Italic.ttf', bolditalics:'Spectral-BoldItalic.ttf' }, Carlito:{ normal:'Carlito-Regular.ttf', bold:'Carlito-Bold.ttf', italics:'Carlito-Italic.ttf', bolditalics:'Carlito-BoldItalic.ttf' } };
+  const blob = await new Promise(res => pdfMake.createPdf(pdfDef(), null, fonts, FONT_VFS).getBlob(res));
+  await deliver(fileBase() + '.pdf', blob);
+}
+
+/* --- DOCX via docx.js --- */
+async function exportDOCX() {
+  if (!window.docx) { toast('Word library did not load. Try again in a moment.'); return; }
+  const { Document, Packer, Paragraph, TextRun, AlignmentType, TabStopType, BorderStyle, LevelFormat } = docx;
+  const st = S.settings, c = S.contact, acc = st.accent.replace('#','');
+  const modern = st.template === 'modern';
+  const font = modern ? 'Calibri' : 'Georgia';
+  const pt = parseFloat(st.size) * (modern ? 1.06 : 1);
+  const sz = Math.round(pt * 2); // half-points
+  const RIGHT = 10620; // 7.375in content width in twips (8.5 - 1.125 margins)
+  const P = (runs, o={}) => new Paragraph({ children: runs.map(r => typeof r === 'string' ? new TextRun({ text:r, font, size:sz }) : new TextRun(Object.assign({ font, size:sz }, r))), spacing:{ after:o.after ?? 0, before:o.before ?? 0, line: 264 }, alignment:o.align, tabStops: o.tabs ? [{ type:TabStopType.RIGHT, position:RIGHT }] : undefined, border:o.border, numbering:o.num });
+  const H = t => P([{ text:t.toUpperCase(), bold:true, color:acc, size:Math.round(sz*(modern?.95:1.02)), characterSpacing:20 }], { before:200, after:60, border: modern ? undefined : { bottom:{ style:BorderStyle.SINGLE, size:6, color:'999999', space:1 } } });
+  const line = (l, r) => P([{ text:l, bold:true }, { text:`\t${r}`, color:'333333' }], { tabs:true });
+  const sub = (l, r) => P([{ text:l, italics:true, color:'333333' }, { text:`\t${r||''}`, italics:true, color:'333333' }], { tabs:true });
+  const bullets = e => (e.bullets||[]).filter(b=>b.trim()).map(b => P([b], { num:{ reference:'b', level:0 }, after:20 }));
+  const kids = [];
+  const contactStr = [c.email, c.phone, c.location, c.website, c.linkedin, c.github].filter(Boolean).map(s=>s.replace(/^https?:\/\//,'')).join('   |   ');
+  kids.push(P([{ text:c.name||' ', bold:true, size:Math.round(sz*2.2), color: modern ? acc : undefined }], { align: modern ? AlignmentType.LEFT : AlignmentType.CENTER }));
+  if (c.title) kids.push(P([{ text:c.title, color:'333333' }], { align: modern ? AlignmentType.LEFT : AlignmentType.CENTER }));
+  kids.push(P([{ text:contactStr, color:'333333', size:Math.round(sz*.95) }], { align: modern ? AlignmentType.LEFT : AlignmentType.CENTER, after:80, border: modern ? undefined : { bottom:{ style:BorderStyle.SINGLE, size:12, color:acc, space:4 } } }));
+  for (const sec of st.order) {
+    if (st.hidden[sec]) continue;
+    if (sec === 'summary') { if (S.summary.trim()) kids.push(H('Summary'), P([S.summary.trim()])); continue; }
+    const items = vis(sec); if (!items.length) continue;
+    kids.push(H(SECTIONS[sec].label));
+    items.forEach(e => {
+      if (sec === 'experience') kids.push(line(e.role, dates(e)), sub(e.company, e.location), ...bullets(e), P([''], { after:40 }));
+      else if (sec === 'education') kids.push(line(e.school, dates(e)), sub([[e.degree,e.field].filter(Boolean).join(' in '), e.gpa?`GPA ${e.gpa}`:''].filter(Boolean).join(', '), e.location), ...bullets(e), P([''], { after:40 }));
+      else if (sec === 'projects') kids.push(P([{ text:e.name, bold:true }, e.tech?{ text:`  |  ${e.tech}`, color:'333333' }:'', { text:`\t${dates(e)}`, color:'333333' }].filter(r=>r!==''), { tabs:true }), ...(e.link?[P([{ text:e.link.replace(/^https?:\/\//,''), italics:true, color:'333333' }])]:[]), ...bullets(e), P([''], { after:40 }));
+      else if (sec === 'skills') kids.push(P([e.category?{ text:`${e.category}: `, bold:true }:'', e.items].filter(r=>r!==''), { after:20 }));
+      else if (sec === 'certifications') kids.push(P([{ text:e.name, bold:true }, e.issuer?`, ${e.issuer}`:'', { text:`\t${e.date||''}`, color:'333333' }].filter(r=>r!==''), { tabs:true, after:20 }));
+      else if (sec === 'involvement') kids.push(line(e.role, dates(e)), sub(e.org, e.location), ...bullets(e), P([''], { after:40 }));
+    });
+  }
+  const doc = new Document({
+    creator:'Folio', title:`${c.name} — Resume`,
+    numbering:{ config:[{ reference:'b', levels:[{ level:0, format:LevelFormat.BULLET, text:'•', alignment:AlignmentType.LEFT, style:{ paragraph:{ indent:{ left:300, hanging:200 } } } }] }] },
+    sections:[{ properties:{ page:{ size:{ width:12240, height:15840 }, margin:{ top:864, right:810, bottom:864, left:810 } } }, children:kids }],
+  });
+  const blob = await Packer.toBlob(doc);
+  await deliver(fileBase() + '.docx', blob);
+}
+
+/* --- menu --- */
+$('#dlBtn').onclick = e => { e.stopPropagation(); $('#dlMenu').classList.toggle('open'); };
+document.addEventListener('click', e => { if (!e.target.closest('#dlMenu')) $('#dlMenu').classList.remove('open'); });
+$('#dlMenu .menu-list').onclick = async e => {
+  const b = e.target.closest('[data-act]'); if (!b) return; $('#dlMenu').classList.remove('open');
+  const act = b.dataset.act;
+  try {
+    if (act === 'pdf') await exportPDF();
+    else if (act === 'docx') await exportDOCX();
+    else if (act === 'print') { $('#work').classList.add('show-pv'); setTimeout(() => window.print(), 50); }
+    else if (act === 'json') await deliver(fileBase() + '_backup.json', JSON.stringify(S, null, 2));
+    else if (act === 'versions') Versions.modal();
+    else if (act === 'import') $('#importFile').click();
+    else if (act === 'importText') { if (AI.available) AI.run('import', {}); else toast('AI import needs the Claude viewer; use Restore from backup instead.'); }
+    else if (act === 'sample') { if (!S.contact.name || await ask('Load sample', 'Replace your current content with the sample resume?', 'Replace')) { S = JSON.parse(JSON.stringify(SAMPLE)); S.experience.forEach(x=>x.id=uid()); active='experience'; weakMarks = {}; commit(true); toast('Sample loaded'); } }
+    else if (act === 'reset') { if (await ask('Clear everything', 'Delete all resume content? A backup (.json) is the only way to get it back.', 'Clear everything')) { S = blank(); weakMarks = {}; active = 'contact'; commit(true); toast('Cleared'); } }
+  } catch (err) { console.error(err); toast('That export failed. Try Print › Save as PDF instead.'); }
+};
+$('#importFile').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader(); r.onload = () => { try { const p = JSON.parse(r.result); if (!p.contact || !p.settings) throw 0; S = Object.assign(blank(), p); S.settings = Object.assign(blank().settings, p.settings); commit(true); toast('Backup restored'); } catch { toast('That file is not a Folio backup.'); } };
+  r.readAsText(f); e.target.value = '';
+};
+
+/* --- mobile tabs --- */
+$('#tabs').onclick = e => { const b = e.target.closest('[data-pane]'); if (!b) return; $$('#tabs button').forEach(x=>x.classList.toggle('on', x===b)); $('#work').classList.toggle('show-edit', b.dataset.pane==='edit'); $('#work').classList.toggle('show-pv', b.dataset.pane==='pv'); if (b.dataset.pane==='pv') requestAnimationFrame(scalePaper); };
+window.addEventListener('afterprint', () => { if (!$('#tabs .on[data-pane="pv"]')) $('#work').classList.remove('show-pv'); });
+
+/* =========================== init =========================== */
+try { const t = localStorage.getItem('folio-theme'); if (t) document.documentElement.dataset.theme = t; } catch(_){}
+load(); renderRail(); renderEditor(); renderPreview(); updateScore();
+$('#aiMenuBtn').hidden = true;
+(async () => {
+  if (!window.claude?.use) return;
+  try { AI.fn = await claude.use('sample'); } catch(_){}
+  if (AI.fn) { AI.available = true; $('#aiMenuBtn').hidden = false; renderEditor(); }
+  try { DL = await claude.use('downloads'); } catch(_){}
+})();
+</script>
+</body>
+</html>
