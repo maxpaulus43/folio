@@ -41,7 +41,7 @@ a{color:var(--accent)}
 
 /* ---- shell ---- */
 .shell{height:100%;display:flex;flex-direction:column}
-.topbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+.topbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
 .brand{display:flex;align-items:baseline;gap:8px;margin-right:auto}
 .brand .mark{font-family:"Spectral",Georgia,serif;font-weight:700;font-size:20px;letter-spacing:-.01em}
 .brand .tag{color:var(--muted);font-size:12.5px}
@@ -276,6 +276,7 @@ a{color:var(--accent)}
 <div class="shell">
   <div class="topbar">
     <div class="brand"><span class="mark">Folio</span><span class="tag">resume studio</span></div>
+    <a class="btn sm ai" href="ai/" style="text-decoration:none">open in claude for AI tools</a>
     <button class="score" id="scoreBtn" title="Resume health"><span class="ring" id="ring"></span><b id="scoreNum">–</b><span class="hide-m">/100</span></button>
     <button class="btn ai" id="aiMenuBtn"><span>✦</span><span class="hide-m">AI tools</span></button>
     <div class="menu" id="dlMenu">
